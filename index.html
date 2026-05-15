@@ -7,43 +7,54 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="launchpad">
+  <div class="page">
+
     <header class="header">
-      <div class="header-left">
-        <div class="logo">
-          <span class="logo-icon">🚀</span>
-          <span class="logo-text">DSC Launchpad</span>
+      <div class="header-inner">
+        <div class="header-top">
+          <div class="header-label">
+            <span class="label-bar"></span>
+            <span class="label-text">INTERNE VÆRKTØJER &amp; RAPPORTERING I DIGITAL</span>
+          </div>
+          <button class="settings-btn" id="settingsBtn" title="Indstillinger">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </button>
         </div>
-      </div>
-      <div class="header-right">
-        <button class="settings-btn" id="settingsBtn" title="Indstillinger">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-          </svg>
-        </button>
+        <div class="header-body">
+          <div class="header-text">
+            <h1 class="greeting">Goddag, velkommen tilbage.</h1>
+            <p class="subtitle">Her er dit overblik over platfome og rapporter.</p>
+          </div>
+          <div class="date-badge" id="dateBadge"></div>
+        </div>
       </div>
     </header>
 
-    <main class="tiles-container" id="tilesContainer"></main>
+    <main class="main">
+      <div class="tiles-grid" id="tilesGrid"></div>
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <div class="empty-icon">🧩</div>
+        <p>Ingen tiles endnu.</p>
+        <p>Klik på tandhjulet øverst for at tilføje tiles.</p>
+      </div>
+    </main>
 
-    <div class="empty-state" id="emptyState" style="display:none;">
-      <div class="empty-icon">🧩</div>
-      <p>Ingen tiles endnu.</p>
-      <p>Klik på tandhjulet for at tilføje tiles.</p>
-    </div>
   </div>
 
   <div class="overlay" id="overlay"></div>
+
   <aside class="settings-panel" id="settingsPanel">
     <div class="settings-header">
       <h2>Indstillinger</h2>
-      <button class="close-btn" id="closeSettings">✕</button>
+      <button class="icon-btn" id="closeSettings">✕</button>
     </div>
     <div class="settings-body">
-      <div class="section-title">Tiles</div>
-      <div id="tileList" class="tile-list"></div>
-      <button class="add-tile-btn" id="addTileBtn">+ Tilføj tile</button>
+      <div class="section-label">Tiles</div>
+      <div class="tile-list" id="tileList"></div>
+      <button class="add-btn" id="addTileBtn">+ Tilføj tile</button>
     </div>
   </aside>
 
@@ -51,23 +62,30 @@
     <div class="modal">
       <div class="modal-header">
         <h3 id="modalTitle">Ny tile</h3>
-        <button class="close-btn" id="closeModal">✕</button>
+        <button class="icon-btn" id="closeModal">✕</button>
       </div>
       <div class="modal-body">
-        <label>Titel<input type="text" id="fieldTitle" placeholder="f.eks. Google Drive" /></label>
+        <label>Titel<input type="text" id="fieldTitle" placeholder="f.eks. Align" /></label>
+        <label>Kategori
+          <select id="fieldCategory">
+            <option value="PLATFORM">Platform</option>
+            <option value="RAPPORTERING">Rapportering</option>
+            <option value="ANDET">Andet</option>
+          </select>
+        </label>
         <label>URL<input type="url" id="fieldUrl" placeholder="https://..." /></label>
-        <label>Ikon (emoji eller URL)<input type="text" id="fieldIcon" placeholder="📁 eller https://..." maxlength="10" /></label>
-        <label>Farve
-          <div class="color-picker-row">
-            <input type="color" id="fieldColor" value="#4f46e5" />
-            <span id="colorPreview" class="color-preview"></span>
+        <label>Beskrivelse<input type="text" id="fieldDesc" placeholder="Kort beskrivelse af værktøjet" /></label>
+        <label>Ikon (emoji)<input type="text" id="fieldIcon" placeholder="📊" maxlength="4" /></label>
+        <label>Ikonfarve
+          <div class="color-row">
+            <input type="color" id="fieldColor" value="#4f8ef7" />
+            <span id="colorPreview" class="color-dot"></span>
           </div>
         </label>
-        <label>Beskrivelse <small>(valgfri)</small><input type="text" id="fieldDesc" placeholder="Kort beskrivelse" /></label>
       </div>
       <div class="modal-footer">
         <button class="btn-danger" id="deleteTileBtn" style="display:none;">Slet</button>
-        <div class="modal-footer-right">
+        <div class="modal-actions">
           <button class="btn-secondary" id="cancelModal">Annuller</button>
           <button class="btn-primary" id="saveTile">Gem</button>
         </div>

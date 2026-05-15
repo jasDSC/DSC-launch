@@ -1,15 +1,27 @@
-const STORAGE_KEY = 'dsc_launchpad_tiles';
+const STORAGE_KEY = 'dsc_launchpad_v2';
 
-const DEFAULT_TILES = [
-  { id: uid(), title: 'Google Drive', url: 'https://drive.google.com', icon: '📁', color: '#4f46e5', desc: 'Filer og dokumenter' },
-  { id: uid(), title: 'Gmail', url: 'https://mail.google.com', icon: '✉️', color: '#ea4335', desc: 'E-mail' },
-  { id: uid(), title: 'Google Meet', url: 'https://meet.google.com', icon: '🎥', color: '#34a853', desc: 'Videomøder' },
-  { id: uid(), title: 'Notion', url: 'https://notion.so', icon: '📝', color: '#6366f1', desc: 'Notater og wikis' },
-];
+const DAYS   = ['Søndag','Mandag','Tirsdag','Onsdag','Torsdag','Fredag','Lørdag'];
+const MONTHS = ['januar','februar','marts','april','maj','juni','juli','august','september','oktober','november','december'];
+
+function formatDate() {
+  const d = new Date();
+  return `${DAYS[d.getDay()]} den ${d.getDate()}. ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+}
 
 function uid() {
   return Math.random().toString(36).slice(2, 10);
 }
+
+const DEFAULT_TILES = [
+  { id: uid(), title: 'Align',    category: 'PLATFORM',     url: '', icon: '⊞',  color: '#3b82f6', desc: 'Opdatering og styring af Must Win Battles i Digital.' },
+  { id: uid(), title: 'Prio',     category: 'PLATFORM',     url: '', icon: '≡',  color: '#06b6d4', desc: 'Strategisk prioriteringsværktøj.' },
+  { id: uid(), title: 'PLUS+',    category: 'RAPPORTERING', url: '', icon: '◑',  color: '#10b981', desc: 'Overblikket over vores loyalitetsprogram.' },
+  { id: uid(), title: 'Kundetal', category: 'RAPPORTERING', url: '', icon: '▮',  color: '#f59e0b', desc: 'Direkte adgang til Kundetalsrapporten.' },
+  { id: uid(), title: 'Nyheder',  category: 'PLATFORM',     url: '', icon: '📰', color: '#f97316', desc: 'Nyt fra DSC organisationen.' },
+  { id: uid(), title: 'ChatGPT',  category: 'PLATFORM',     url: '', icon: '🤖', color: '#8b5cf6', desc: 'DSC chatgpt.' },
+  { id: uid(), title: 'Visma',    category: 'PLATFORM',     url: '', icon: '🕐', color: '#ef4444', desc: 'Ferie, fravær, timer og privatudlæg.' },
+  { id: uid(), title: 'Emplate',  category: 'PLATFORM',     url: '', icon: '🏪', color: '#ec4899', desc: 'Adgang til multimall dashboard. Kontakt Emplate for adgang.' },
+];
 
 function loadTiles() {
   try {
@@ -19,64 +31,76 @@ function loadTiles() {
   return DEFAULT_TILES;
 }
 
-function saveTiles(tiles) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tiles));
-}
-
-function renderTileIcon(icon) {
-  if (!icon) return '🔗';
-  if (icon.startsWith('http')) {
-    return `<img src="${escHtml(icon)}" alt="" onerror="this.parentElement.textContent='🔗'" />`;
-  }
-  return escHtml(icon);
+function saveTiles(list) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
 }
 
 function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
 }
 
 let tiles = loadTiles();
 let editingId = null;
 
-const tilesContainer = document.getElementById('tilesContainer');
-const emptyState     = document.getElementById('emptyState');
-const settingsBtn    = document.getElementById('settingsBtn');
-const settingsPanel  = document.getElementById('settingsPanel');
-const overlay        = document.getElementById('overlay');
-const closeSettings  = document.getElementById('closeSettings');
-const tileList       = document.getElementById('tileList');
-const addTileBtn     = document.getElementById('addTileBtn');
-const modalBackdrop  = document.getElementById('modalBackdrop');
-const closeModal     = document.getElementById('closeModal');
-const cancelModal    = document.getElementById('cancelModal');
-const saveTileBtn    = document.getElementById('saveTile');
-const deleteTileBtn  = document.getElementById('deleteTileBtn');
-const modalTitle     = document.getElementById('modalTitle');
-const fieldTitle     = document.getElementById('fieldTitle');
-const fieldUrl       = document.getElementById('fieldUrl');
-const fieldIcon      = document.getElementById('fieldIcon');
-const fieldColor     = document.getElementById('fieldColor');
-const fieldDesc      = document.getElementById('fieldDesc');
-const colorPreview   = document.getElementById('colorPreview');
+const tilesGrid     = document.getElementById('tilesGrid');
+const emptyState    = document.getElementById('emptyState');
+const dateBadge     = document.getElementById('dateBadge');
+const settingsBtn   = document.getElementById('settingsBtn');
+const settingsPanel = document.getElementById('settingsPanel');
+const overlay       = document.getElementById('overlay');
+const closeSettings = document.getElementById('closeSettings');
+const tileList      = document.getElementById('tileList');
+const addTileBtn    = document.getElementById('addTileBtn');
+const modalBackdrop = document.getElementById('modalBackdrop');
+const closeModal    = document.getElementById('closeModal');
+const cancelModal   = document.getElementById('cancelModal');
+const saveTileBtn   = document.getElementById('saveTile');
+const deleteTileBtn = document.getElementById('deleteTileBtn');
+const modalTitle    = document.getElementById('modalTitle');
+const fieldTitle    = document.getElementById('fieldTitle');
+const fieldCategory = document.getElementById('fieldCategory');
+const fieldUrl      = document.getElementById('fieldUrl');
+const fieldDesc     = document.getElementById('fieldDesc');
+const fieldIcon     = document.getElementById('fieldIcon');
+const fieldColor    = document.getElementById('fieldColor');
+const colorPreview  = document.getElementById('colorPreview');
+
+dateBadge.textContent = formatDate();
 
 function renderTiles() {
-  tilesContainer.innerHTML = '';
+  tilesGrid.innerHTML = '';
   const isEmpty = tiles.length === 0;
   emptyState.style.display = isEmpty ? 'flex' : 'none';
-  tilesContainer.style.display = isEmpty ? 'none' : 'grid';
+  tilesGrid.style.display  = isEmpty ? 'none' : 'grid';
+
   tiles.forEach(tile => {
     const a = document.createElement('a');
     a.className = 'tile';
     a.href = tile.url || '#';
     a.target = tile.url ? '_blank' : '_self';
     a.rel = 'noopener noreferrer';
-    a.style.setProperty('--tile-color', tile.color || 'var(--accent)');
+    const bg = hexToRgba(tile.color || '#3b82f6', 0.15);
     a.innerHTML = `
-      <div class="tile-icon">${renderTileIcon(tile.icon)}</div>
+      <div class="tile-icon-wrap" style="background:${bg}">
+        <span style="color:${escHtml(tile.color||'#3b82f6')};font-size:1.4rem;">${escHtml(tile.icon||'🔗')}</span>
+      </div>
+      <div class="tile-category">${escHtml(tile.category||'PLATFORM')}</div>
       <div class="tile-title">${escHtml(tile.title)}</div>
-      ${tile.desc ? `<div class="tile-desc">${escHtml(tile.desc)}</div>` : ''}
+      <div class="tile-desc">${escHtml(tile.desc||'')}</div>
+      <div class="tile-cta">Gå til værktøj <span>→</span></div>
     `;
-    tilesContainer.appendChild(a);
+    tilesGrid.appendChild(a);
   });
 }
 
@@ -85,13 +109,13 @@ function renderTileList() {
   tiles.forEach(tile => {
     const item = document.createElement('div');
     item.className = 'tile-list-item';
+    const bg = hexToRgba(tile.color || '#3b82f6', 0.15);
     item.innerHTML = `
-      <div class="tile-list-icon">${renderTileIcon(tile.icon)}</div>
+      <div class="tile-list-dot" style="background:${bg};color:${escHtml(tile.color||'#3b82f6')}">${escHtml(tile.icon||'🔗')}</div>
       <div class="tile-list-info">
         <div class="tile-list-name">${escHtml(tile.title)}</div>
-        <div class="tile-list-url">${escHtml(tile.url || '—')}</div>
+        <div class="tile-list-cat">${escHtml(tile.category||'PLATFORM')}</div>
       </div>
-      <div class="tile-list-color" style="background:${escHtml(tile.color || '#4f46e5')}"></div>
     `;
     item.addEventListener('click', () => openModal(tile.id));
     tileList.appendChild(item);
@@ -116,16 +140,17 @@ overlay.addEventListener('click', closeSettingsPanel);
 function openModal(id) {
   editingId = id || null;
   const tile = id ? tiles.find(t => t.id === id) : null;
-  modalTitle.textContent = tile ? 'Rediger tile' : 'Ny tile';
-  fieldTitle.value = tile?.title || '';
-  fieldUrl.value   = tile?.url   || '';
-  fieldIcon.value  = tile?.icon  || '';
-  fieldColor.value = tile?.color || '#4f46e5';
-  fieldDesc.value  = tile?.desc  || '';
+  modalTitle.textContent  = tile ? 'Rediger tile' : 'Ny tile';
+  fieldTitle.value        = tile?.title    || '';
+  fieldCategory.value     = tile?.category || 'PLATFORM';
+  fieldUrl.value          = tile?.url      || '';
+  fieldDesc.value         = tile?.desc     || '';
+  fieldIcon.value         = tile?.icon     || '';
+  fieldColor.value        = tile?.color    || '#3b82f6';
   colorPreview.style.background = fieldColor.value;
-  deleteTileBtn.style.display = tile ? 'block' : 'none';
+  deleteTileBtn.style.display   = tile ? 'block' : 'none';
   modalBackdrop.classList.add('open');
-  fieldTitle.focus();
+  setTimeout(() => fieldTitle.focus(), 50);
 }
 
 function closeModalFn() {
@@ -144,10 +169,11 @@ saveTileBtn.addEventListener('click', () => {
   if (!title) { fieldTitle.focus(); return; }
   const data = {
     title,
-    url:   fieldUrl.value.trim(),
-    icon:  fieldIcon.value.trim() || '🔗',
-    color: fieldColor.value,
-    desc:  fieldDesc.value.trim(),
+    category: fieldCategory.value,
+    url:      fieldUrl.value.trim(),
+    desc:     fieldDesc.value.trim(),
+    icon:     fieldIcon.value.trim() || '🔗',
+    color:    fieldColor.value,
   };
   if (editingId) {
     tiles = tiles.map(t => t.id === editingId ? { ...t, ...data } : t);
