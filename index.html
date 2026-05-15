@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DSC Launchpad</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="launchpad">
+    <header class="header">
+      <div class="header-left">
+        <div class="logo">
+          <span class="logo-icon">🚀</span>
+          <span class="logo-text">DSC Launchpad</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="settings-btn" id="settingsBtn" title="Indstillinger">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="tiles-container" id="tilesContainer"></main>
+
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <div class="empty-icon">🧩</div>
+      <p>Ingen tiles endnu.</p>
+      <p>Klik på tandhjulet for at tilføje tiles.</p>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+  <aside class="settings-panel" id="settingsPanel">
+    <div class="settings-header">
+      <h2>Indstillinger</h2>
+      <button class="close-btn" id="closeSettings">✕</button>
+    </div>
+    <div class="settings-body">
+      <div class="section-title">Tiles</div>
+      <div id="tileList" class="tile-list"></div>
+      <button class="add-tile-btn" id="addTileBtn">+ Tilføj tile</button>
+    </div>
+  </aside>
+
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">Ny tile</h3>
+        <button class="close-btn" id="closeModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <label>Titel<input type="text" id="fieldTitle" placeholder="f.eks. Google Drive" /></label>
+        <label>URL<input type="url" id="fieldUrl" placeholder="https://..." /></label>
+        <label>Ikon (emoji eller URL)<input type="text" id="fieldIcon" placeholder="📁 eller https://..." maxlength="10" /></label>
+        <label>Farve
+          <div class="color-picker-row">
+            <input type="color" id="fieldColor" value="#4f46e5" />
+            <span id="colorPreview" class="color-preview"></span>
+          </div>
+        </label>
+        <label>Beskrivelse <small>(valgfri)</small><input type="text" id="fieldDesc" placeholder="Kort beskrivelse" /></label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-danger" id="deleteTileBtn" style="display:none;">Slet</button>
+        <div class="modal-footer-right">
+          <button class="btn-secondary" id="cancelModal">Annuller</button>
+          <button class="btn-primary" id="saveTile">Gem</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
