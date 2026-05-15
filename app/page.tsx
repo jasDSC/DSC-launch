@@ -114,24 +114,31 @@ function TileCard({ tile }: { tile: Tile }) {
       className="group flex flex-col bg-white rounded-lg shadow-sm border border-[var(--border-subtle)] p-[22px] gap-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg no-underline"
       style={{ textDecoration: 'none' }}
     >
+      {/* Icon */}
       <div
         className="flex items-center justify-center w-12 h-12 rounded-md text-xl flex-shrink-0"
         style={{ background: iconBg }}
       >
         <span style={{ color: tile.color || '#303751' }}>{tile.icon || '🔗'}</span>
       </div>
+
+      {/* Category label */}
       <span
         className="text-[11px] font-semibold uppercase tracking-[0.12em]"
         style={{ color: 'var(--fg-2)' }}
       >
         {tile.category || 'PLATFORM'}
       </span>
+
+      {/* Title */}
       <h3
         className="text-[18px] font-bold leading-snug tracking-[-0.02em] m-0"
         style={{ color: 'var(--fg-1)' }}
       >
         {tile.title}
       </h3>
+
+      {/* Description */}
       {tile.desc && (
         <p
           className="text-[13px] leading-relaxed flex-1 m-0"
@@ -140,9 +147,14 @@ function TileCard({ tile }: { tile: Tile }) {
           {tile.desc}
         </p>
       )}
+
+      {/* CTA */}
       <div
         className="flex items-center justify-between text-[13px] font-semibold pt-3 mt-auto border-t"
-        style={{ borderColor: 'var(--border-subtle)', color: 'var(--fg-brand)' }}
+        style={{
+          borderColor: 'var(--border-subtle)',
+          color: 'var(--fg-brand)',
+        }}
       >
         <span>Gå til værktøj</span>
         <span className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
@@ -180,7 +192,7 @@ function TileListItem({ tile, onClick }: { tile: Tile; onClick: () => void }) {
   );
 }
 
-// ── Modal state ──
+// ── Modal ──
 interface ModalState {
   open: boolean;
   editingId: string | null;
@@ -216,15 +228,18 @@ export default function LaunchpadPage() {
   const [nameInput, setNameInput]       = useState('');
   const titleRef = useRef<HTMLInputElement>(null);
 
+  // ── Hydration ──
   useEffect(() => {
     const savedName  = localStorage.getItem(NAME_KEY) || '';
     const savedTheme = localStorage.getItem(THEME_KEY);
     const isDark     = savedTheme === 'dark';
+
     let saved: Tile[] = DEFAULT_CONFIGURABLE;
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) saved = JSON.parse(raw);
     } catch {}
+
     setUserName(savedName);
     setNameInput(savedName);
     setDarkMode(isDark);
@@ -234,19 +249,27 @@ export default function LaunchpadPage() {
     setMounted(true);
   }, []);
 
+  // Apply dark class
   useEffect(() => {
     document.documentElement.classList.toggle('dark', darkMode);
   }, [darkMode]);
 
+  // Refresh greeting every minute
   useEffect(() => {
-    const interval = setInterval(() => setGreeting(getGreeting(userName)), 60_000);
+    const interval = setInterval(() => {
+      setGreeting(getGreeting(userName));
+    }, 60_000);
     return () => clearInterval(interval);
   }, [userName]);
 
+  // Focus modal title when it opens
   useEffect(() => {
-    if (modal.open && titleRef.current) setTimeout(() => titleRef.current?.focus(), 50);
+    if (modal.open && titleRef.current) {
+      setTimeout(() => titleRef.current?.focus(), 50);
+    }
   }, [modal.open]);
 
+  // Keyboard dismiss
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -279,16 +302,30 @@ export default function LaunchpadPage() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tiles));
   }, []);
 
-  const openModalNew  = useCallback(() => setModal({ ...emptyModal, open: true }), []);
+  const openModalNew = useCallback(() => {
+    setModal({ ...emptyModal, open: true });
+  }, []);
 
   const openModalEdit = useCallback((id: string) => {
     const tile = configTiles.find(t => t.id === id);
     if (!tile) return;
-    setModal({ open: true, editingId: id, title: tile.title, category: tile.category, url: tile.url, desc: tile.desc, icon: tile.icon, color: tile.color });
+    setModal({
+      open: true,
+      editingId: id,
+      title: tile.title,
+      category: tile.category,
+      url: tile.url,
+      desc: tile.desc,
+      icon: tile.icon,
+      color: tile.color,
+    });
   }, [configTiles]);
 
   const handleSaveTile = useCallback(() => {
-    if (!modal.title.trim()) { titleRef.current?.focus(); return; }
+    if (!modal.title.trim()) {
+      titleRef.current?.focus();
+      return;
+    }
     const data = {
       title:    modal.title.trim(),
       category: modal.category,
@@ -311,209 +348,458 @@ export default function LaunchpadPage() {
     setModal(emptyModal);
   }, [modal.editingId, configTiles, saveConfigTiles]);
 
-  if (!mounted) return <div className="min-h-screen" style={{ background: 'var(--bg-page)' }} />;
+  if (!mounted) {
+    return (
+      <div className="min-h-screen" style={{ background: 'var(--bg-page)' }} />
+    );
+  }
 
   const allTiles = [...FIXED_TILES, ...configTiles];
 
   return (
-    <div className="min-h-screen font-sans" style={{ background: 'var(--bg-page)', color: 'var(--fg-1)' }}>
-
-      {/* Header */}
-      <header className="border-b" style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}>
+    <div
+      className="min-h-screen flex flex-col justify-center font-sans"
+      style={{ background: 'var(--bg-page)', color: 'var(--fg-1)' }}
+    >
+      {/* ── Header ── */}
+      <header>
         <div className="max-w-6xl mx-auto px-6 py-5">
+          {/* Top row */}
           <div className="flex items-center justify-between mb-5">
+            {/* Label bar */}
             <div className="flex items-center gap-2.5">
-              <div className="w-0.5 h-4 rounded-full flex-shrink-0" style={{ background: 'var(--navy-500)' }} />
-              <span className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--navy-500)' }}>
+              <div
+                className="w-0.5 h-4 rounded-full flex-shrink-0"
+                style={{ background: 'var(--navy-500)' }}
+              />
+              <span
+                className="text-[11px] font-semibold uppercase tracking-[0.14em]"
+                style={{ color: 'var(--navy-500)' }}
+              >
                 INTERNE VÆRKTØJER &amp; RAPPORTERING I DIGITAL
               </span>
             </div>
+
+            {/* Topbar actions */}
             <div className="flex items-center gap-2">
               <button
                 onClick={toggleTheme}
                 className="flex items-center justify-center w-9 h-9 rounded-md transition-colors border"
-                style={{ color: 'var(--fg-2)', borderColor: 'var(--border-subtle)', background: 'transparent' }}
-                title="Skift tema" aria-label="Skift tema"
+                style={{
+                  color: 'var(--fg-2)',
+                  borderColor: 'var(--border-subtle)',
+                  background: 'transparent',
+                }}
+                title="Skift tema"
+                aria-label="Skift tema"
               >
                 {darkMode ? <IconSun /> : <IconMoon />}
               </button>
               <button
                 onClick={() => setSettingsOpen(true)}
                 className="flex items-center justify-center w-9 h-9 rounded-md transition-colors border"
-                style={{ color: 'var(--fg-2)', borderColor: 'var(--border-subtle)', background: 'transparent' }}
-                title="Indstillinger" aria-label="Indstillinger"
+                style={{
+                  color: 'var(--fg-2)',
+                  borderColor: 'var(--border-subtle)',
+                  background: 'transparent',
+                }}
+                title="Indstillinger"
+                aria-label="Indstillinger"
               >
                 <IconGear />
               </button>
             </div>
           </div>
+
+          {/* Hero row */}
           <div className="flex items-end justify-between gap-4 flex-wrap">
             <div>
-              <h1 className="text-[34px] font-extrabold leading-tight m-0" style={{ letterSpacing: '-0.03em', color: 'var(--fg-1)' }}>
+              <h1
+                className="text-[34px] font-extrabold leading-tight m-0"
+                style={{ letterSpacing: '-0.03em', color: 'var(--fg-1)' }}
+              >
                 {greeting}
               </h1>
-              <p className="text-[15px] mt-1.5 m-0" style={{ color: 'var(--fg-2)' }}>
+              <p
+                className="text-[15px] mt-1.5 m-0"
+                style={{ color: 'var(--fg-2)' }}
+              >
                 Her er dit overblik over platforme og rapporter.
               </p>
             </div>
-            <div className="px-4 py-2 rounded-md text-[13px] font-semibold flex-shrink-0 border"
-              style={{ background: 'var(--bg-tinted-tan)', borderColor: 'var(--tan-200)', color: 'var(--tan-700)' }}>
+
+            {/* Date badge */}
+            <div
+              className="px-4 py-2 rounded-md text-[13px] font-semibold flex-shrink-0 border"
+              style={{
+                background: 'var(--bg-tinted-tan)',
+                borderColor: 'var(--tan-200)',
+                color: 'var(--tan-700)',
+              }}
+            >
               {dateStr}
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main */}
-      <main className="max-w-6xl mx-auto px-6 py-8">
+      {/* ── Main ── */}
+      <main className="max-w-6xl mx-auto px-6 pb-8">
         {allTiles.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 gap-3 rounded-lg border"
-            style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-surface)' }}>
+          <div
+            className="flex flex-col items-center justify-center py-24 gap-3 rounded-lg border"
+            style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-surface)' }}
+          >
             <span className="text-4xl">🧩</span>
             <p className="text-[15px]" style={{ color: 'var(--fg-2)' }}>Ingen tiles endnu.</p>
-            <p className="text-[13px]" style={{ color: 'var(--fg-3)' }}>Klik på tandhjulet øverst for at tilføje tiles.</p>
+            <p className="text-[13px]" style={{ color: 'var(--fg-3)' }}>
+              Klik på tandhjulet øverst for at tilføje tiles.
+            </p>
           </div>
         ) : (
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {allTiles.map(tile => <TileCard key={tile.id} tile={tile} />)}
+            {allTiles.map(tile => (
+              <TileCard key={tile.id} tile={tile} />
+            ))}
           </div>
         )}
       </main>
 
-      {/* Overlay */}
+      {/* ── Overlay ── */}
       {(settingsOpen || modal.open) && (
         <div
           className="fixed inset-0 z-40 transition-opacity duration-200"
           style={{ background: 'rgba(27,31,44,0.35)' }}
-          onClick={() => { if (modal.open) setModal(emptyModal); else setSettingsOpen(false); }}
+          onClick={() => {
+            if (modal.open) setModal(emptyModal);
+            else setSettingsOpen(false);
+          }}
         />
       )}
 
-      {/* Settings Panel */}
+      {/* ── Settings Panel ── */}
       <aside
         className="fixed top-0 right-0 h-full w-80 z-50 flex flex-col transition-transform duration-300 shadow-lg border-l"
-        style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', transform: settingsOpen ? 'translateX(0)' : 'translateX(100%)' }}
+        style={{
+          background: 'var(--bg-surface)',
+          borderColor: 'var(--border-subtle)',
+          transform: settingsOpen ? 'translateX(0)' : 'translateX(100%)',
+        }}
       >
-        <div className="flex items-center justify-between px-6 py-5 border-b flex-shrink-0" style={{ borderColor: 'var(--border-subtle)' }}>
-          <h2 className="text-[18px] font-bold m-0" style={{ color: 'var(--fg-1)' }}>Indstillinger</h2>
-          <button onClick={() => setSettingsOpen(false)}
+        {/* Panel header */}
+        <div
+          className="flex items-center justify-between px-6 py-5 border-b flex-shrink-0"
+          style={{ borderColor: 'var(--border-subtle)' }}
+        >
+          <h2 className="text-[18px] font-bold m-0" style={{ color: 'var(--fg-1)' }}>
+            Indstillinger
+          </h2>
+          <button
+            onClick={() => setSettingsOpen(false)}
             className="flex items-center justify-center w-8 h-8 rounded-md text-[16px] border transition-colors"
             style={{ borderColor: 'var(--border-subtle)', color: 'var(--fg-2)', background: 'transparent' }}
-            aria-label="Luk indstillinger">✕</button>
+            aria-label="Luk indstillinger"
+          >
+            ✕
+          </button>
         </div>
+
+        {/* Panel body */}
         <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5">
+          {/* Name */}
           <div>
-            <div className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-2" style={{ color: 'var(--fg-2)' }}>Dit navn</div>
+            <div
+              className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-2"
+              style={{ color: 'var(--fg-2)' }}
+            >
+              Dit navn
+            </div>
             <div className="flex gap-2">
-              <input type="text" value={nameInput} onChange={e => setNameInput(e.target.value)}
+              <input
+                type="text"
+                value={nameInput}
+                onChange={e => setNameInput(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') saveName(); }}
-                placeholder="f.eks. Jacob" maxLength={40}
+                placeholder="f.eks. Jacob"
+                maxLength={40}
                 className="flex-1 px-3 py-2 rounded-md text-[14px] border outline-none transition-shadow"
-                style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', color: 'var(--fg-1)' }}
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-subtle)',
+                  color: 'var(--fg-1)',
+                }}
               />
-              <button onClick={saveName}
+              <button
+                onClick={saveName}
                 className="px-4 py-2 rounded-md text-[13px] font-semibold transition-colors flex-shrink-0"
-                style={{ background: 'var(--navy-500)', color: 'var(--white)' }}>Gem</button>
+                style={{
+                  background: 'var(--navy-500)',
+                  color: 'var(--white)',
+                }}
+              >
+                Gem
+              </button>
             </div>
           </div>
+
+          {/* Fixed tiles notice */}
           <div>
-            <div className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-2" style={{ color: 'var(--fg-2)' }}>Faste tiles</div>
-            <p className="text-[13px] leading-relaxed px-3 py-2.5 rounded-md border"
-              style={{ color: 'var(--fg-2)', background: 'var(--bg-surface-2)', borderColor: 'var(--border-subtle)' }}>
+            <div
+              className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-2"
+              style={{ color: 'var(--fg-2)' }}
+            >
+              Faste tiles
+            </div>
+            <p
+              className="text-[13px] leading-relaxed px-3 py-2.5 rounded-md border"
+              style={{
+                color: 'var(--fg-2)',
+                background: 'var(--bg-surface-2)',
+                borderColor: 'var(--border-subtle)',
+              }}
+            >
               Align, Rate, Team profil, Intega og CatalystOne er faste og kan ikke redigeres.
             </p>
           </div>
+
+          {/* Configurable tiles */}
           <div className="flex-1">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-2" style={{ color: 'var(--fg-2)' }}>Konfigurerbare tiles</div>
+            <div
+              className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-2"
+              style={{ color: 'var(--fg-2)' }}
+            >
+              Konfigurerbare tiles
+            </div>
             <div className="flex flex-col gap-1">
               {configTiles.length === 0 && (
-                <p className="text-[13px] px-3 py-2" style={{ color: 'var(--fg-3)' }}>Ingen tiles endnu.</p>
+                <p className="text-[13px] px-3 py-2" style={{ color: 'var(--fg-3)' }}>
+                  Ingen tiles endnu.
+                </p>
               )}
               {configTiles.map(tile => (
-                <TileListItem key={tile.id} tile={tile} onClick={() => { openModalEdit(tile.id); }} />
+                <TileListItem
+                  key={tile.id}
+                  tile={tile}
+                  onClick={() => { openModalEdit(tile.id); }}
+                />
               ))}
             </div>
           </div>
-          <button onClick={openModalNew}
+
+          {/* Add button */}
+          <button
+            onClick={openModalNew}
             className="w-full py-2.5 rounded-md text-[14px] font-semibold border-2 border-dashed transition-colors"
-            style={{ borderColor: 'var(--navy-300)', color: 'var(--navy-500)', background: 'transparent' }}>
+            style={{
+              borderColor: 'var(--navy-300)',
+              color: 'var(--navy-500)',
+              background: 'transparent',
+            }}
+          >
             + Tilføj tile
           </button>
         </div>
       </aside>
 
-      {/* Tile Editor Modal */}
+      {/* ── Tile Editor Modal ── */}
       {modal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          onClick={e => { if (e.target === e.currentTarget) setModal(emptyModal); }}>
-          <div className="w-full max-w-md rounded-xl shadow-lg border flex flex-col max-h-[90vh]"
-            style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}>
-            <div className="flex items-center justify-between px-6 py-5 border-b flex-shrink-0" style={{ borderColor: 'var(--border-subtle)' }}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          onClick={e => { if (e.target === e.currentTarget) setModal(emptyModal); }}
+        >
+          <div
+            className="w-full max-w-md rounded-xl shadow-lg border flex flex-col max-h-[90vh]"
+            style={{
+              background: 'var(--bg-surface)',
+              borderColor: 'var(--border-subtle)',
+            }}
+          >
+            {/* Modal header */}
+            <div
+              className="flex items-center justify-between px-6 py-5 border-b flex-shrink-0"
+              style={{ borderColor: 'var(--border-subtle)' }}
+            >
               <h3 className="text-[18px] font-bold m-0" style={{ color: 'var(--fg-1)' }}>
                 {modal.editingId ? 'Rediger tile' : 'Ny tile'}
               </h3>
-              <button onClick={() => setModal(emptyModal)}
+              <button
+                onClick={() => setModal(emptyModal)}
                 className="flex items-center justify-center w-8 h-8 rounded-md text-[16px] border transition-colors"
                 style={{ borderColor: 'var(--border-subtle)', color: 'var(--fg-2)', background: 'transparent' }}
-                aria-label="Luk">✕</button>
+                aria-label="Luk"
+              >
+                ✕
+              </button>
             </div>
+
+            {/* Modal body */}
             <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
-              {([
-                { label: 'Titel',       field: 'title' as const, type: 'text', placeholder: 'f.eks. Align' },
-                { label: 'URL',         field: 'url'   as const, type: 'text', placeholder: 'https://...' },
-                { label: 'Beskrivelse', field: 'desc'  as const, type: 'text', placeholder: 'Kort beskrivelse af værktøjet' },
-                { label: 'Ikon',        field: 'icon'  as const, type: 'text', placeholder: '📊' },
-              ] as const).map(({ label, field, type, placeholder }) => (
-                <label key={field} className="flex flex-col gap-1.5">
-                  <span className="text-[12px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--fg-2)' }}>{label}</span>
-                  <input ref={field === 'title' ? titleRef : undefined}
-                    type={type} value={modal[field]}
-                    onChange={e => setModal(m => ({ ...m, [field]: e.target.value }))}
-                    placeholder={placeholder}
-                    className="px-3 py-2.5 rounded-md text-[14px] border outline-none"
-                    style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', color: 'var(--fg-1)' }}
-                  />
-                </label>
-              ))}
+              {/* Title */}
               <label className="flex flex-col gap-1.5">
-                <span className="text-[12px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--fg-2)' }}>Kategori</span>
-                <select value={modal.category} onChange={e => setModal(m => ({ ...m, category: e.target.value }))}
+                <span className="text-[12px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--fg-2)' }}>
+                  Titel
+                </span>
+                <input
+                  ref={titleRef}
+                  type="text"
+                  value={modal.title}
+                  onChange={e => setModal(m => ({ ...m, title: e.target.value }))}
+                  placeholder="f.eks. Align"
                   className="px-3 py-2.5 rounded-md text-[14px] border outline-none"
-                  style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', color: 'var(--fg-1)' }}>
+                  style={{
+                    background: 'var(--bg-surface)',
+                    borderColor: 'var(--border-subtle)',
+                    color: 'var(--fg-1)',
+                  }}
+                />
+              </label>
+
+              {/* Category */}
+              <label className="flex flex-col gap-1.5">
+                <span className="text-[12px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--fg-2)' }}>
+                  Kategori
+                </span>
+                <select
+                  value={modal.category}
+                  onChange={e => setModal(m => ({ ...m, category: e.target.value }))}
+                  className="px-3 py-2.5 rounded-md text-[14px] border outline-none"
+                  style={{
+                    background: 'var(--bg-surface)',
+                    borderColor: 'var(--border-subtle)',
+                    color: 'var(--fg-1)',
+                  }}
+                >
                   <option value="PLATFORM">Platform</option>
                   <option value="RAPPORTERING">Rapportering</option>
                   <option value="ANDET">Andet</option>
                 </select>
               </label>
+
+              {/* URL */}
               <label className="flex flex-col gap-1.5">
-                <span className="text-[12px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--fg-2)' }}>Ikonfarve</span>
+                <span className="text-[12px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--fg-2)' }}>
+                  URL
+                </span>
+                <input
+                  type="url"
+                  value={modal.url}
+                  onChange={e => setModal(m => ({ ...m, url: e.target.value }))}
+                  placeholder="https://..."
+                  className="px-3 py-2.5 rounded-md text-[14px] border outline-none"
+                  style={{
+                    background: 'var(--bg-surface)',
+                    borderColor: 'var(--border-subtle)',
+                    color: 'var(--fg-1)',
+                  }}
+                />
+              </label>
+
+              {/* Description */}
+              <label className="flex flex-col gap-1.5">
+                <span className="text-[12px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--fg-2)' }}>
+                  Beskrivelse
+                </span>
+                <input
+                  type="text"
+                  value={modal.desc}
+                  onChange={e => setModal(m => ({ ...m, desc: e.target.value }))}
+                  placeholder="Kort beskrivelse af værktøjet"
+                  className="px-3 py-2.5 rounded-md text-[14px] border outline-none"
+                  style={{
+                    background: 'var(--bg-surface)',
+                    borderColor: 'var(--border-subtle)',
+                    color: 'var(--fg-1)',
+                  }}
+                />
+              </label>
+
+              {/* Icon */}
+              <label className="flex flex-col gap-1.5">
+                <span className="text-[12px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--fg-2)' }}>
+                  Ikon
+                </span>
+                <input
+                  type="text"
+                  value={modal.icon}
+                  onChange={e => setModal(m => ({ ...m, icon: e.target.value }))}
+                  placeholder="📊"
+                  maxLength={4}
+                  className="px-3 py-2.5 rounded-md text-[14px] border outline-none"
+                  style={{
+                    background: 'var(--bg-surface)',
+                    borderColor: 'var(--border-subtle)',
+                    color: 'var(--fg-1)',
+                  }}
+                />
+              </label>
+
+              {/* Color */}
+              <label className="flex flex-col gap-1.5">
+                <span className="text-[12px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--fg-2)' }}>
+                  Ikonfarve
+                </span>
                 <div className="flex items-center gap-3">
-                  <input type="color" value={modal.color} onChange={e => setModal(m => ({ ...m, color: e.target.value }))}
+                  <input
+                    type="color"
+                    value={modal.color}
+                    onChange={e => setModal(m => ({ ...m, color: e.target.value }))}
                     className="w-10 h-10 rounded-md border cursor-pointer p-0.5"
-                    style={{ borderColor: 'var(--border-subtle)' }} />
-                  <div className="w-10 h-10 rounded-md border flex-shrink-0"
-                    style={{ background: hexToRgba(modal.color, 0.15), borderColor: 'var(--border-subtle)' }} />
-                  <span className="text-[13px]" style={{ color: 'var(--fg-2)' }}>{modal.color}</span>
+                    style={{ borderColor: 'var(--border-subtle)' }}
+                  />
+                  <div
+                    className="w-10 h-10 rounded-md border flex-shrink-0"
+                    style={{
+                      background: hexToRgba(modal.color, 0.15),
+                      borderColor: 'var(--border-subtle)',
+                    }}
+                  />
+                  <span className="text-[13px]" style={{ color: 'var(--fg-2)' }}>
+                    {modal.color}
+                  </span>
                 </div>
               </label>
             </div>
-            <div className="flex items-center justify-between px-6 py-4 border-t flex-shrink-0" style={{ borderColor: 'var(--border-subtle)' }}>
+
+            {/* Modal footer */}
+            <div
+              className="flex items-center justify-between px-6 py-4 border-t flex-shrink-0"
+              style={{ borderColor: 'var(--border-subtle)' }}
+            >
               {modal.editingId ? (
-                <button onClick={handleDeleteTile}
+                <button
+                  onClick={handleDeleteTile}
                   className="px-4 py-2 rounded-md text-[13px] font-semibold transition-colors"
-                  style={{ background: 'var(--danger-bg)', color: 'var(--danger-fg)', border: '1px solid var(--plum-200)' }}>
+                  style={{
+                    background: 'var(--danger-bg)',
+                    color: 'var(--danger-fg)',
+                    border: '1px solid var(--plum-200)',
+                  }}
+                >
                   Slet
                 </button>
-              ) : <div />}
+              ) : (
+                <div />
+              )}
               <div className="flex items-center gap-2">
-                <button onClick={() => setModal(emptyModal)}
+                <button
+                  onClick={() => setModal(emptyModal)}
                   className="px-4 py-2 rounded-md text-[13px] font-semibold transition-colors border"
-                  style={{ borderColor: 'var(--border-subtle)', color: 'var(--fg-2)', background: 'transparent' }}>
+                  style={{
+                    borderColor: 'var(--border-subtle)',
+                    color: 'var(--fg-2)',
+                    background: 'transparent',
+                  }}
+                >
                   Annuller
                 </button>
-                <button onClick={handleSaveTile}
+                <button
+                  onClick={handleSaveTile}
                   className="px-4 py-2 rounded-md text-[13px] font-semibold transition-colors"
-                  style={{ background: 'var(--navy-500)', color: 'var(--white)' }}>
+                  style={{
+                    background: 'var(--navy-500)',
+                    color: 'var(--white)',
+                  }}
+                >
                   Gem
                 </button>
               </div>
