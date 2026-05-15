@@ -1,0 +1,230 @@
+/* =============================================================
+   ZENCE DESIGN SYSTEM — colors_and_type.css
+   Calm, considered, Scandinavian visual foundation.
+   Built on the actual brand palette: navy / tan / sage / plum / mist
+   ============================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap');
+
+:root {
+  --navy-50:  #F2F4F8;
+  --navy-100: #E2E6EE;
+  --navy-200: #BBC2D3;
+  --navy-300: #8F99B5;
+  --navy-400: #5E6B91;
+  --navy-500: #303751;
+  --navy-600: #262D43;
+  --navy-700: #1B2032;
+  --navy-800: #111521;
+
+  --tan-50:  #FAF6EE;
+  --tan-100: #F1E9D5;
+  --tan-200: #E3CFA9;
+  --tan-300: #D2B57F;
+  --tan-400: #C5A77B;
+  --tan-500: #BC9F6D;
+  --tan-600: #9C8055;
+  --tan-700: #7A6440;
+  --tan-800: #5C4B30;
+
+  --sage-50:  #F4F8F5;
+  --sage-100: #E5EFE7;
+  --sage-200: #D0DFD3;
+  --sage-300: #B6CCBA;
+  --sage-400: #93B099;
+  --sage-500: #6D8D74;
+  --sage-600: #506C56;
+  --sage-700: #3A4F3F;
+  --sage-800: #25342A;
+
+  --mist-50:  #F5F8F8;
+  --mist-100: #E5ECEC;
+  --mist-200: #CBD7D7;
+  --mist-300: #ABBABA;
+  --mist-400: #869494;
+  --mist-500: #5F6C6C;
+  --mist-600: #475252;
+  --mist-700: #313939;
+
+  --plum-50:  #F8EEF2;
+  --plum-100: #EFD9E1;
+  --plum-200: #D9ADBC;
+  --plum-300: #B97D93;
+  --plum-400: #985873;
+  --plum-500: #7F3457;
+  --plum-600: #6A2A48;
+  --plum-700: #531F39;
+  --plum-800: #3B1429;
+
+  --sand-50:  #FAF5F1;
+  --sand-100: #F2EAE3;
+  --sand-200: #E0D0CA;
+  --sand-300: #C5B5AE;
+  --sand-400: #A99889;
+  --sand-500: #7E6E62;
+  --sand-600: #5C5048;
+  --sand-700: #3F3731;
+  --sand-800: #28221E;
+  --sand-900: #1B1F2C;
+
+  --white: #FFFFFF;
+  --black: #000000;
+
+  /* Legacy aliases */
+  --raspberry-50:  var(--navy-50);
+  --raspberry-100: var(--navy-100);
+  --raspberry-200: var(--navy-200);
+  --raspberry-300: var(--navy-300);
+  --raspberry-400: var(--navy-400);
+  --raspberry-500: var(--navy-500);
+  --raspberry-600: var(--navy-600);
+  --raspberry-700: var(--navy-700);
+  --raspberry-800: var(--navy-800);
+
+  --teal-50:  var(--sage-50);
+  --teal-100: var(--sage-100);
+  --teal-200: var(--sage-200);
+  --teal-300: var(--sage-300);
+  --teal-400: var(--sage-400);
+  --teal-500: var(--sage-600);
+  --teal-600: var(--sage-700);
+  --teal-700: var(--sage-700);
+  --teal-800: var(--sage-800);
+
+  --ochre-50:  var(--tan-50);
+  --ochre-100: var(--tan-100);
+  --ochre-200: var(--tan-200);
+  --ochre-300: var(--tan-300);
+  --ochre-400: var(--tan-400);
+  --ochre-500: var(--tan-600);
+  --ochre-600: var(--tan-700);
+  --ochre-700: var(--tan-700);
+  --ochre-800: var(--tan-800);
+
+  /* Surfaces */
+  --bg-page:        var(--sand-50);
+  --bg-surface:     var(--white);
+  --bg-surface-2:   var(--sand-100);
+  --bg-tinted-1:    var(--sage-200);
+  --bg-tinted-2:    var(--sand-200);
+  --bg-tinted-3:    var(--mist-200);
+  --bg-tinted-tan:  var(--tan-100);
+
+  /* Foreground */
+  --fg-1:        var(--sand-900);
+  --fg-2:        var(--sand-600);
+  --fg-3:        var(--sand-400);
+  --fg-on-dark:  var(--white);
+  --fg-brand:    var(--navy-500);
+
+  /* Borders */
+  --border-subtle: var(--sand-200);
+  --border-strong: var(--sand-300);
+  --border-focus:  var(--navy-500);
+
+  /* Brand */
+  --brand-primary:        var(--navy-500);
+  --brand-primary-hover:  var(--navy-600);
+  --brand-primary-press:  var(--navy-700);
+  --brand-on-primary:     var(--white);
+  --brand-accent:         var(--tan-500);
+  --brand-rare:           var(--plum-500);
+
+  /* Data-viz */
+  --data-1: var(--navy-500);
+  --data-2: var(--tan-500);
+  --data-3: var(--sage-600);
+  --data-4: var(--plum-500);
+
+  /* Semantic */
+  --success:    var(--sage-600);
+  --success-bg: var(--sage-100);
+  --success-fg: var(--sage-700);
+  --warning:    var(--tan-500);
+  --warning-bg: var(--tan-100);
+  --warning-fg: var(--tan-700);
+  --danger:    var(--plum-500);
+  --danger-bg: var(--plum-100);
+  --danger-fg: var(--plum-700);
+  --info:    var(--navy-500);
+  --info-bg: var(--navy-100);
+  --info-fg: var(--navy-700);
+
+  /* Typography */
+  --font-sans: 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --fs-display-xl: 64px;
+  --fs-display-lg: 48px;
+  --fs-display-md: 36px;
+  --fs-h1: 34px;
+  --fs-h2: 22px;
+  --fs-h3: 18px;
+  --fs-body: 15px;
+  --fs-body-sm: 13px;
+  --fs-label: 12px;
+  --fs-caption: 11px;
+
+  --lh-tight: 1.1;
+  --lh-snug: 1.25;
+  --lh-normal: 1.5;
+  --lh-loose: 1.7;
+
+  --ls-tight: -0.02em;
+  --ls-normal: 0;
+  --ls-wide: 0.04em;
+  --ls-uppercase: 0.12em;
+
+  --fw-light: 300;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-extrabold: 800;
+
+  /* Spacing */
+  --space-1:  4px;  --space-2:  8px;  --space-3:  12px; --space-4:  16px;
+  --space-5:  20px; --space-6:  24px; --space-8:  32px; --space-10: 40px;
+  --space-12: 48px; --space-16: 64px; --space-20: 80px;
+
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+
+  --shadow-xs: 0 1px 2px rgba(48, 55, 81, 0.04);
+  --shadow-sm: 0 2px 6px rgba(48, 55, 81, 0.06);
+  --shadow-md: 0 4px 16px rgba(48, 55, 81, 0.07), 0 1px 3px rgba(48, 55, 81, 0.04);
+  --shadow-lg: 0 12px 32px rgba(48, 55, 81, 0.10), 0 2px 6px rgba(48, 55, 81, 0.05);
+  --shadow-focus: 0 0 0 3px rgba(48, 55, 81, 0.18);
+
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+}
+
+html, body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-normal);
+  color: var(--fg-1);
+  background: var(--bg-page);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.z-display-xl, .z-numeral-hero { font-family: var(--font-display); font-size: var(--fs-display-xl); font-weight: var(--fw-light); line-height: var(--lh-tight); letter-spacing: var(--ls-tight); }
+.z-display-lg, .z-numeral      { font-family: var(--font-display); font-size: var(--fs-display-lg); font-weight: var(--fw-light); line-height: var(--lh-tight); letter-spacing: var(--ls-tight); }
+.z-h1 { font-size: var(--fs-h1); font-weight: var(--fw-extrabold); line-height: var(--lh-tight); letter-spacing: -0.03em; }
+.z-h2 { font-size: var(--fs-h2); font-weight: var(--fw-extrabold); line-height: var(--lh-snug);  letter-spacing: -0.025em; }
+.z-h3 { font-size: var(--fs-h3); font-weight: var(--fw-bold);      line-height: var(--lh-snug);  letter-spacing: -0.02em; }
+.z-body    { font-size: var(--fs-body);    font-weight: var(--fw-regular); line-height: var(--lh-normal); }
+.z-body-sm { font-size: var(--fs-body-sm); font-weight: var(--fw-regular); line-height: var(--lh-normal); }
+.z-label   { font-size: var(--fs-label); font-weight: var(--fw-semibold); letter-spacing: var(--ls-uppercase); text-transform: uppercase; color: var(--fg-2); }
+.z-caption { font-size: var(--fs-caption); color: var(--fg-2); }
+.z-wordmark { font-family: var(--font-display); font-weight: var(--fw-extrabold); letter-spacing: -0.03em; color: var(--brand-primary); }
