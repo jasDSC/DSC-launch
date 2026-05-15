@@ -290,6 +290,16 @@ html, body {
   gap: 10px;
 }
 
+.fixed-tile-notice {
+  font-size: 0.78rem;
+  color: var(--muted);
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  line-height: 1.4;
+}
+
 .section-label {
   font-size: 0.7rem;
   font-weight: 700;

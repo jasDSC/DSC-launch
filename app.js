@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'dsc_launchpad_v2';
+const STORAGE_KEY = 'dsc_launchpad_v3';
 const THEME_KEY   = 'dsc_theme';
 
 const DAYS   = ['Søndag','Mandag','Tirsdag','Onsdag','Torsdag','Fredag','Lørdag'];
@@ -20,26 +20,31 @@ function uid() {
   return Math.random().toString(36).slice(2, 10);
 }
 
-const DEFAULT_TILES = [
-  { id: uid(), title: 'Align',    category: 'PLATFORM',     url: '', icon: '⊞',  color: '#3b82f6', desc: 'Opdatering og styring af Must Win Battles i Digital.' },
-  { id: uid(), title: 'Prio',     category: 'PLATFORM',     url: '', icon: '≡',  color: '#06b6d4', desc: 'Strategisk prioriteringsværktøj.' },
-  { id: uid(), title: 'PLUS+',    category: 'RAPPORTERING', url: '', icon: '◑',  color: '#10b981', desc: 'Overblikket over vores loyalitetsprogram.' },
-  { id: uid(), title: 'Kundetal', category: 'RAPPORTERING', url: '', icon: '▮',  color: '#f59e0b', desc: 'Direkte adgang til Kundetalsrapporten.' },
-  { id: uid(), title: 'Nyheder',  category: 'PLATFORM',     url: '', icon: '📰', color: '#f97316', desc: 'Nyt fra DSC organisationen.' },
-  { id: uid(), title: 'ChatGPT',  category: 'PLATFORM',     url: '', icon: '🤖', color: '#8b5cf6', desc: 'DSC chatgpt.' },
-  { id: uid(), title: 'Visma',    category: 'PLATFORM',     url: '', icon: '🕐', color: '#ef4444', desc: 'Ferie, fravær, timer og privatudlæg.' },
-  { id: uid(), title: 'Emplate',  category: 'PLATFORM',     url: '', icon: '🏪', color: '#ec4899', desc: 'Adgang til multimall dashboard. Kontakt Emplate for adgang.' },
+// Fixed tiles — always shown first, not editable via settings
+const FIXED_TILES = [
+  { id: 'fixed-1', title: 'Align',       category: 'PLATFORM', url: 'https://dsc-align.vercel.app/',    icon: '🎯', color: '#3b82f6', desc: 'Opdatering og styring af Must Win Battles i Digital.' },
+  { id: 'fixed-2', title: 'Rate',        category: 'PLATFORM', url: 'https://dsc-rate.vercel.app/',     icon: '⭐', color: '#06b6d4', desc: 'Rate både individuelt og som team.' },
+  { id: 'fixed-3', title: 'Team profil', category: 'PLATFORM', url: 'https://dsc-disc.vercel.app/',     icon: '👥', color: '#8b5cf6', desc: 'Skab en teamprofil og styrk samarbejde.' },
+  { id: 'fixed-4', title: 'Intega',      category: 'PLATFORM', url: '',                                  icon: '📅', color: '#f97316', desc: 'Ferie, fravær og personlige udlæg.' },
+  { id: 'fixed-5', title: 'CatalystOne', category: 'PLATFORM', url: 'https://dsc.catalystone.com/',     icon: '🏢', color: '#10b981', desc: 'HR portal.' },
 ];
 
-function loadTiles() {
+// Configurable tiles — editable via settings, stored in localStorage
+const DEFAULT_CONFIGURABLE = [
+  { id: uid(), title: 'PLUS+',   category: 'RAPPORTERING', url: 'https://app.powerbi.com/Redirect?action=OpenReport&appId=f3d8cbea-ed58-44ba-8e36-9374e5e37850&reportObjectId=9c69306e-4831-44fe-99e6-5d6e6b12797a&ctid=b674d8e3-4004-4ad4-81d7-15f60fd35cd6&reportPage=f2d8a56517ca2e70292c&pbi_source=appShareLink&portalSessionId=0d654b33-7553-4347-a0b6-c6ae0d24ff43', icon: '◑',  color: '#10b981', desc: 'Overblikket over vores loyalitetsprogram.' },
+  { id: uid(), title: 'Nyheder', category: 'PLATFORM',     url: 'https://danskeshoppingcentre.sharepoint.com/sites/home', icon: '📰', color: '#f59e0b', desc: 'Nyt fra DSC organisationen.' },
+  { id: uid(), title: 'ChatGPT', category: 'PLATFORM',     url: 'https://chatgpt.com/',                  icon: '🤖', color: '#ec4899', desc: 'DSC chatgpt.' },
+];
+
+function loadConfigurable() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
   } catch {}
-  return DEFAULT_TILES;
+  return DEFAULT_CONFIGURABLE;
 }
 
-function saveTiles(list) {
+function saveConfigurable(list) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
 }
 
@@ -58,7 +63,7 @@ function hexToRgba(hex, alpha) {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
-let tiles = loadTiles();
+let configTiles = loadConfigurable();
 let editingId = null;
 
 const greeting      = document.querySelector('.greeting');
@@ -86,11 +91,10 @@ const fieldIcon     = document.getElementById('fieldIcon');
 const fieldColor    = document.getElementById('fieldColor');
 const colorPreview  = document.getElementById('colorPreview');
 
-// ── Init date & greeting ──
+// ── Init date, greeting & theme ──
 dateBadge.textContent = formatDate();
 greeting.textContent  = getGreeting();
 
-// ── Theme ──
 function applyTheme(light) {
   document.documentElement.classList.toggle('light', light);
   localStorage.setItem(THEME_KEY, light ? 'light' : 'dark');
@@ -100,36 +104,40 @@ themeBtn.addEventListener('click', () => {
   applyTheme(!document.documentElement.classList.contains('light'));
 });
 
-// ── Render tiles ──
-function renderTiles() {
-  tilesGrid.innerHTML = '';
-  const isEmpty = tiles.length === 0;
-  emptyState.style.display = isEmpty ? 'flex' : 'none';
-  tilesGrid.style.display  = isEmpty ? 'none' : 'grid';
-  tiles.forEach(tile => {
-    const a = document.createElement('a');
-    a.className = 'tile';
-    a.href = tile.url || '#';
-    a.target = tile.url ? '_blank' : '_self';
-    a.rel = 'noopener noreferrer';
-    const bg = hexToRgba(tile.color || '#3b82f6', 0.15);
-    a.innerHTML = `
-      <div class="tile-icon-wrap" style="background:${bg}">
-        <span style="color:${escHtml(tile.color||'#3b82f6')};font-size:1.4rem;">${escHtml(tile.icon||'🔗')}</span>
-      </div>
-      <div class="tile-category">${escHtml(tile.category||'PLATFORM')}</div>
-      <div class="tile-title">${escHtml(tile.title)}</div>
-      <div class="tile-desc">${escHtml(tile.desc||'')}</div>
-      <div class="tile-cta">Gå til værktøj <span>→</span></div>
-    `;
-    tilesGrid.appendChild(a);
-  });
+// ── Build tile card HTML ──
+function makeTileEl(tile) {
+  const a = document.createElement('a');
+  a.className = 'tile';
+  a.href = tile.url || '#';
+  a.target = tile.url ? '_blank' : '_self';
+  a.rel = 'noopener noreferrer';
+  const bg = hexToRgba(tile.color || '#3b82f6', 0.15);
+  a.innerHTML = `
+    <div class="tile-icon-wrap" style="background:${bg}">
+      <span style="color:${escHtml(tile.color||'#3b82f6')};font-size:1.4rem;">${escHtml(tile.icon||'🔗')}</span>
+    </div>
+    <div class="tile-category">${escHtml(tile.category||'PLATFORM')}</div>
+    <div class="tile-title">${escHtml(tile.title)}</div>
+    <div class="tile-desc">${escHtml(tile.desc||'')}</div>
+    <div class="tile-cta">Gå til værktøj <span>→</span></div>
+  `;
+  return a;
 }
 
-// ── Render settings list ──
+// ── Render all tiles ──
+function renderTiles() {
+  tilesGrid.innerHTML = '';
+  const all = [...FIXED_TILES, ...configTiles];
+  emptyState.style.display = all.length === 0 ? 'flex' : 'none';
+  tilesGrid.style.display  = all.length === 0 ? 'none' : 'grid';
+  FIXED_TILES.forEach(t => tilesGrid.appendChild(makeTileEl(t)));
+  configTiles.forEach(t => tilesGrid.appendChild(makeTileEl(t)));
+}
+
+// ── Render settings list (configurable only) ──
 function renderTileList() {
   tileList.innerHTML = '';
-  tiles.forEach(tile => {
+  configTiles.forEach(tile => {
     const item = document.createElement('div');
     item.className = 'tile-list-item';
     const bg = hexToRgba(tile.color || '#3b82f6', 0.15);
@@ -164,7 +172,7 @@ overlay.addEventListener('click', closeSettingsPanel);
 // ── Modal ──
 function openModal(id) {
   editingId = id || null;
-  const tile = id ? tiles.find(t => t.id === id) : null;
+  const tile = id ? configTiles.find(t => t.id === id) : null;
   modalTitle.textContent        = tile ? 'Rediger tile' : 'Ny tile';
   fieldTitle.value              = tile?.title    || '';
   fieldCategory.value           = tile?.category || 'PLATFORM';
@@ -201,11 +209,11 @@ saveTileBtn.addEventListener('click', () => {
     color:    fieldColor.value,
   };
   if (editingId) {
-    tiles = tiles.map(t => t.id === editingId ? { ...t, ...data } : t);
+    configTiles = configTiles.map(t => t.id === editingId ? { ...t, ...data } : t);
   } else {
-    tiles.push({ id: uid(), ...data });
+    configTiles.push({ id: uid(), ...data });
   }
-  saveTiles(tiles);
+  saveConfigurable(configTiles);
   renderTiles();
   renderTileList();
   closeModalFn();
@@ -213,8 +221,8 @@ saveTileBtn.addEventListener('click', () => {
 
 deleteTileBtn.addEventListener('click', () => {
   if (!editingId) return;
-  tiles = tiles.filter(t => t.id !== editingId);
-  saveTiles(tiles);
+  configTiles = configTiles.filter(t => t.id !== editingId);
+  saveConfigurable(configTiles);
   renderTiles();
   renderTileList();
   closeModalFn();
