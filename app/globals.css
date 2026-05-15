@@ -1,0 +1,22 @@
+@import './dsc-digital.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: var(--bg-page);
+  --foreground: var(--fg-1);
+}
+
+body {
+  color: var(--fg-1);
+  background: var(--bg-page);
+  font-family: var(--font-sans);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
