@@ -1,5 +1,6 @@
 const STORAGE_KEY = 'dsc_launchpad_v3';
 const THEME_KEY   = 'dsc_theme';
+const NAME_KEY    = 'dsc_user_name';
 
 const DAYS   = ['Søndag','Mandag','Tirsdag','Onsdag','Torsdag','Fredag','Lørdag'];
 const MONTHS = ['januar','februar','marts','april','maj','juni','juli','august','september','oktober','november','december'];
@@ -10,17 +11,18 @@ function formatDate() {
 }
 
 function getGreeting() {
-  const h = new Date().getHours();
-  if (h >= 5 && h < 12) return 'Godmorgen, velkommen tilbage.';
-  if (h >= 12 && h < 18) return 'Goddag, velkommen tilbage.';
-  return 'Godaften, velkommen tilbage.';
+  const h      = new Date().getHours();
+  const name   = localStorage.getItem(NAME_KEY)?.trim();
+  const suffix = name ? ` ${name}.` : ', velkommen tilbage.';
+  if (h >= 5 && h < 12) return 'Godmorgen' + suffix;
+  if (h >= 12 && h < 18) return 'Goddag' + suffix;
+  return 'Godaften' + suffix;
 }
 
 function uid() {
   return Math.random().toString(36).slice(2, 10);
 }
 
-// Fixed tiles — always shown first, not editable via settings
 const FIXED_TILES = [
   { id: 'fixed-1', title: 'Align',       category: 'PLATFORM', url: 'https://dsc-align.vercel.app/',    icon: '🎯', color: '#3b82f6', desc: 'Opdatering og styring af Must Win Battles i Digital.' },
   { id: 'fixed-2', title: 'Rate',        category: 'PLATFORM', url: 'https://dsc-rate.vercel.app/',     icon: '⭐', color: '#06b6d4', desc: 'Rate både individuelt og som team.' },
@@ -29,7 +31,6 @@ const FIXED_TILES = [
   { id: 'fixed-5', title: 'CatalystOne', category: 'PLATFORM', url: 'https://dsc.catalystone.com/',     icon: '🏢', color: '#10b981', desc: 'HR portal.' },
 ];
 
-// Configurable tiles — editable via settings, stored in localStorage
 const DEFAULT_CONFIGURABLE = [
   { id: uid(), title: 'PLUS+',   category: 'RAPPORTERING', url: 'https://app.powerbi.com/Redirect?action=OpenReport&appId=f3d8cbea-ed58-44ba-8e36-9374e5e37850&reportObjectId=9c69306e-4831-44fe-99e6-5d6e6b12797a&ctid=b674d8e3-4004-4ad4-81d7-15f60fd35cd6&reportPage=f2d8a56517ca2e70292c&pbi_source=appShareLink&portalSessionId=0d654b33-7553-4347-a0b6-c6ae0d24ff43', icon: '◑',  color: '#10b981', desc: 'Overblikket over vores loyalitetsprogram.' },
   { id: uid(), title: 'Nyheder', category: 'PLATFORM',     url: 'https://danskeshoppingcentre.sharepoint.com/sites/home', icon: '📰', color: '#f59e0b', desc: 'Nyt fra DSC organisationen.' },
@@ -73,6 +74,8 @@ let configTiles = loadConfigurable();
 let editingId = null;
 
 const greeting      = document.querySelector('.greeting');
+const fieldName     = document.getElementById('fieldName');
+const saveNameBtn   = document.getElementById('saveNameBtn');
 const themeBtn      = document.getElementById('themeBtn');
 const tilesGrid     = document.getElementById('tilesGrid');
 const emptyState    = document.getElementById('emptyState');
@@ -97,10 +100,22 @@ const fieldIcon     = document.getElementById('fieldIcon');
 const fieldColor    = document.getElementById('fieldColor');
 const colorPreview  = document.getElementById('colorPreview');
 
-// ── Init date, greeting & theme ──
 dateBadge.textContent = formatDate();
 greeting.textContent  = getGreeting();
 
+// ── Name ──
+fieldName.value = localStorage.getItem(NAME_KEY) || '';
+saveNameBtn.addEventListener('click', () => {
+  const name = fieldName.value.trim();
+  if (name) localStorage.setItem(NAME_KEY, name);
+  else localStorage.removeItem(NAME_KEY);
+  greeting.textContent = getGreeting();
+});
+fieldName.addEventListener('keydown', e => {
+  if (e.key === 'Enter') saveNameBtn.click();
+});
+
+// ── Theme ──
 function applyTheme(light) {
   document.documentElement.classList.toggle('light', light);
   localStorage.setItem(THEME_KEY, light ? 'light' : 'dark');
@@ -110,7 +125,6 @@ themeBtn.addEventListener('click', () => {
   applyTheme(!document.documentElement.classList.contains('light'));
 });
 
-// ── Build tile card HTML ──
 function makeTileEl(tile) {
   const a = document.createElement('a');
   a.className = 'tile';
@@ -131,7 +145,6 @@ function makeTileEl(tile) {
   return a;
 }
 
-// ── Render all tiles ──
 function renderTiles() {
   tilesGrid.innerHTML = '';
   const all = [...FIXED_TILES, ...configTiles];
@@ -142,7 +155,6 @@ function renderTiles() {
   configTiles.forEach(t => tilesGrid.appendChild(makeTileEl(t)));
 }
 
-// ── Render settings list (configurable only) ──
 function renderTileList() {
   tileList.innerHTML = '';
   configTiles.forEach(tile => {
@@ -161,7 +173,6 @@ function renderTileList() {
   });
 }
 
-// ── Settings panel ──
 function openSettings() {
   renderTileList();
   settingsPanel.classList.add('open');
@@ -177,7 +188,6 @@ settingsBtn.addEventListener('click', openSettings);
 closeSettings.addEventListener('click', closeSettingsPanel);
 overlay.addEventListener('click', closeSettingsPanel);
 
-// ── Modal ──
 function openModal(id) {
   editingId = id || null;
   const tile = id ? configTiles.find(t => t.id === id) : null;

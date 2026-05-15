@@ -92,7 +92,6 @@ html, body {
 
 .theme-btn svg { width: 16px; height: 16px; }
 
-/* show moon in dark mode (switch to light), sun in light mode (switch to dark) */
 :root .icon-moon       { display: block; }
 :root .icon-sun        { display: none; }
 :root.light .icon-moon { display: none; }
@@ -288,6 +287,29 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.name-field-wrap {
+  display: flex;
+  gap: 8px;
+}
+
+.name-field-wrap input {
+  flex: 1;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 0.92rem;
+  padding: 9px 12px;
+  outline: none;
+  transition: var(--trans);
+  font-family: inherit;
+}
+
+.name-field-wrap input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.18);
 }
 
 .fixed-tile-notice {
