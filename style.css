@@ -15,6 +15,17 @@
   --trans:     0.2s cubic-bezier(0.4,0,0.2,1);
 }
 
+:root.light {
+  --bg:     #f1f5fb;
+  --card:   #ffffff;
+  --card2:  #e8eef7;
+  --border: #d0daea;
+  --accent: #2563eb;
+  --text:   #0f172a;
+  --muted:  #64748b;
+  --muted2: #475569;
+}
+
 html, body {
   min-height: 100%;
   background: var(--bg);
@@ -22,6 +33,7 @@ html, body {
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   font-size: 15px;
   line-height: 1.5;
+  transition: background var(--trans), color var(--trans);
 }
 
 .page { min-height: 100vh; display: flex; flex-direction: column; }
@@ -56,6 +68,35 @@ html, body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+.theme-btn {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--trans);
+  flex-shrink: 0;
+}
+
+.theme-btn:hover {
+  color: var(--text);
+  border-color: var(--accent);
+  background: rgba(59,130,246,0.15);
+}
+
+.theme-btn svg { width: 16px; height: 16px; }
+
+/* show moon in dark mode (switch to light), sun in light mode (switch to dark) */
+:root .icon-moon       { display: block; }
+:root .icon-sun        { display: none; }
+:root.light .icon-moon { display: none; }
+:root.light .icon-sun  { display: block; }
 
 .settings-btn {
   background: var(--card2);
@@ -107,6 +148,7 @@ html, body {
   color: var(--muted2);
   white-space: nowrap;
   flex-shrink: 0;
+  transition: background var(--trans), border-color var(--trans);
 }
 
 .main { flex: 1; padding: 0 48px 60px; }
@@ -128,7 +170,7 @@ html, body {
   flex-direction: column;
   text-decoration: none;
   color: var(--text);
-  transition: var(--trans);
+  transition: border-color var(--trans), background var(--trans), transform var(--trans), box-shadow var(--trans);
   cursor: pointer;
   min-height: 210px;
 }
@@ -137,7 +179,7 @@ html, body {
   border-color: rgba(59,130,246,0.4);
   background: var(--card2);
   transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.15);
 }
 
 .tile-icon-wrap {
@@ -182,7 +224,7 @@ html, body {
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: var(--trans);
+  transition: color var(--trans);
 }
 
 .tile:hover .tile-cta { color: var(--accent); }
@@ -223,7 +265,7 @@ html, body {
   flex-direction: column;
   transform: translateX(100%);
   transition: transform var(--trans);
-  box-shadow: -12px 0 40px rgba(0,0,0,0.5);
+  box-shadow: -12px 0 40px rgba(0,0,0,0.3);
 }
 
 .settings-panel.open { transform: translateX(0); }
@@ -341,7 +383,7 @@ html, body {
   width: 100%;
   max-width: 440px;
   margin: 20px;
-  box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+  box-shadow: 0 32px 80px rgba(0,0,0,0.4);
   animation: popIn 0.18s ease;
 }
 

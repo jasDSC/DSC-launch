@@ -1,4 +1,5 @@
 const STORAGE_KEY = 'dsc_launchpad_v2';
+const THEME_KEY   = 'dsc_theme';
 
 const DAYS   = ['Søndag','Mandag','Tirsdag','Onsdag','Torsdag','Fredag','Lørdag'];
 const MONTHS = ['januar','februar','marts','april','maj','juni','juli','august','september','oktober','november','december'];
@@ -6,6 +7,13 @@ const MONTHS = ['januar','februar','marts','april','maj','juni','juli','august',
 function formatDate() {
   const d = new Date();
   return `${DAYS[d.getDay()]} den ${d.getDate()}. ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 12) return 'Godmorgen, velkommen tilbage.';
+  if (h >= 12 && h < 18) return 'Goddag, velkommen tilbage.';
+  return 'Godaften, velkommen tilbage.';
 }
 
 function uid() {
@@ -53,6 +61,8 @@ function hexToRgba(hex, alpha) {
 let tiles = loadTiles();
 let editingId = null;
 
+const greeting      = document.querySelector('.greeting');
+const themeBtn      = document.getElementById('themeBtn');
 const tilesGrid     = document.getElementById('tilesGrid');
 const emptyState    = document.getElementById('emptyState');
 const dateBadge     = document.getElementById('dateBadge');
@@ -76,14 +86,26 @@ const fieldIcon     = document.getElementById('fieldIcon');
 const fieldColor    = document.getElementById('fieldColor');
 const colorPreview  = document.getElementById('colorPreview');
 
+// ── Init date & greeting ──
 dateBadge.textContent = formatDate();
+greeting.textContent  = getGreeting();
 
+// ── Theme ──
+function applyTheme(light) {
+  document.documentElement.classList.toggle('light', light);
+  localStorage.setItem(THEME_KEY, light ? 'light' : 'dark');
+}
+applyTheme(localStorage.getItem(THEME_KEY) === 'light');
+themeBtn.addEventListener('click', () => {
+  applyTheme(!document.documentElement.classList.contains('light'));
+});
+
+// ── Render tiles ──
 function renderTiles() {
   tilesGrid.innerHTML = '';
   const isEmpty = tiles.length === 0;
   emptyState.style.display = isEmpty ? 'flex' : 'none';
   tilesGrid.style.display  = isEmpty ? 'none' : 'grid';
-
   tiles.forEach(tile => {
     const a = document.createElement('a');
     a.className = 'tile';
@@ -104,6 +126,7 @@ function renderTiles() {
   });
 }
 
+// ── Render settings list ──
 function renderTileList() {
   tileList.innerHTML = '';
   tiles.forEach(tile => {
@@ -122,6 +145,7 @@ function renderTileList() {
   });
 }
 
+// ── Settings panel ──
 function openSettings() {
   renderTileList();
   settingsPanel.classList.add('open');
@@ -137,16 +161,17 @@ settingsBtn.addEventListener('click', openSettings);
 closeSettings.addEventListener('click', closeSettingsPanel);
 overlay.addEventListener('click', closeSettingsPanel);
 
+// ── Modal ──
 function openModal(id) {
   editingId = id || null;
   const tile = id ? tiles.find(t => t.id === id) : null;
-  modalTitle.textContent  = tile ? 'Rediger tile' : 'Ny tile';
-  fieldTitle.value        = tile?.title    || '';
-  fieldCategory.value     = tile?.category || 'PLATFORM';
-  fieldUrl.value          = tile?.url      || '';
-  fieldDesc.value         = tile?.desc     || '';
-  fieldIcon.value         = tile?.icon     || '';
-  fieldColor.value        = tile?.color    || '#3b82f6';
+  modalTitle.textContent        = tile ? 'Rediger tile' : 'Ny tile';
+  fieldTitle.value              = tile?.title    || '';
+  fieldCategory.value           = tile?.category || 'PLATFORM';
+  fieldUrl.value                = tile?.url      || '';
+  fieldDesc.value               = tile?.desc     || '';
+  fieldIcon.value               = tile?.icon     || '';
+  fieldColor.value              = tile?.color    || '#3b82f6';
   colorPreview.style.background = fieldColor.value;
   deleteTileBtn.style.display   = tile ? 'block' : 'none';
   modalBackdrop.classList.add('open');
