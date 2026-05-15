@@ -25,7 +25,7 @@ const FIXED_TILES = [
   { id: 'fixed-1', title: 'Align',       category: 'PLATFORM', url: 'https://dsc-align.vercel.app/',    icon: '🎯', color: '#3b82f6', desc: 'Opdatering og styring af Must Win Battles i Digital.' },
   { id: 'fixed-2', title: 'Rate',        category: 'PLATFORM', url: 'https://dsc-rate.vercel.app/',     icon: '⭐', color: '#06b6d4', desc: 'Rate både individuelt og som team.' },
   { id: 'fixed-3', title: 'Team profil', category: 'PLATFORM', url: 'https://dsc-disc.vercel.app/',     icon: '👥', color: '#8b5cf6', desc: 'Skab en teamprofil og styrk samarbejde.' },
-  { id: 'fixed-4', title: 'Intega',      category: 'PLATFORM', url: '',                                  icon: '📅', color: '#f97316', desc: 'Ferie, fravær og personlige udlæg.' },
+  { id: 'fixed-4', title: 'Intega',      category: 'PLATFORM', url: 'https://integatime.dk/web/',       icon: '📅', color: '#f97316', desc: 'Ferie, fravær og personlige udlæg.' },
   { id: 'fixed-5', title: 'CatalystOne', category: 'PLATFORM', url: 'https://dsc.catalystone.com/',     icon: '🏢', color: '#10b981', desc: 'HR portal.' },
 ];
 
@@ -33,7 +33,7 @@ const FIXED_TILES = [
 const DEFAULT_CONFIGURABLE = [
   { id: uid(), title: 'PLUS+',   category: 'RAPPORTERING', url: 'https://app.powerbi.com/Redirect?action=OpenReport&appId=f3d8cbea-ed58-44ba-8e36-9374e5e37850&reportObjectId=9c69306e-4831-44fe-99e6-5d6e6b12797a&ctid=b674d8e3-4004-4ad4-81d7-15f60fd35cd6&reportPage=f2d8a56517ca2e70292c&pbi_source=appShareLink&portalSessionId=0d654b33-7553-4347-a0b6-c6ae0d24ff43', icon: '◑',  color: '#10b981', desc: 'Overblikket over vores loyalitetsprogram.' },
   { id: uid(), title: 'Nyheder', category: 'PLATFORM',     url: 'https://danskeshoppingcentre.sharepoint.com/sites/home', icon: '📰', color: '#f59e0b', desc: 'Nyt fra DSC organisationen.' },
-  { id: uid(), title: 'ChatGPT', category: 'PLATFORM',     url: 'https://chatgpt.com/',                  icon: '🤖', color: '#ec4899', desc: 'DSC chatgpt.' },
+  { id: uid(), title: 'ChatGPT', category: 'PLATFORM',     url: 'https://chatgpt.com/',                 icon: '🤖', color: '#ec4899', desc: 'DSC chatgpt.' },
 ];
 
 function loadConfigurable() {
@@ -54,6 +54,12 @@ function escHtml(s) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+function normalizeUrl(url) {
+  if (!url) return '';
+  if (/^https?:\/\//i.test(url)) return url;
+  return 'https://' + url;
 }
 
 function hexToRgba(hex, alpha) {
@@ -108,8 +114,9 @@ themeBtn.addEventListener('click', () => {
 function makeTileEl(tile) {
   const a = document.createElement('a');
   a.className = 'tile';
-  a.href = tile.url || '#';
-  a.target = tile.url ? '_blank' : '_self';
+  const tileUrl = normalizeUrl(tile.url);
+  a.href = tileUrl || '#';
+  a.target = tileUrl ? '_blank' : '_self';
   a.rel = 'noopener noreferrer';
   const bg = hexToRgba(tile.color || '#3b82f6', 0.15);
   a.innerHTML = `
@@ -128,8 +135,9 @@ function makeTileEl(tile) {
 function renderTiles() {
   tilesGrid.innerHTML = '';
   const all = [...FIXED_TILES, ...configTiles];
-  emptyState.style.display = all.length === 0 ? 'flex' : 'none';
-  tilesGrid.style.display  = all.length === 0 ? 'none' : 'grid';
+  const isEmpty = all.length === 0;
+  emptyState.style.display = isEmpty ? 'flex' : 'none';
+  tilesGrid.style.display  = isEmpty ? 'none' : 'grid';
   FIXED_TILES.forEach(t => tilesGrid.appendChild(makeTileEl(t)));
   configTiles.forEach(t => tilesGrid.appendChild(makeTileEl(t)));
 }
@@ -203,7 +211,7 @@ saveTileBtn.addEventListener('click', () => {
   const data = {
     title,
     category: fieldCategory.value,
-    url:      fieldUrl.value.trim(),
+    url:      normalizeUrl(fieldUrl.value.trim()),
     desc:     fieldDesc.value.trim(),
     icon:     fieldIcon.value.trim() || '🔗',
     color:    fieldColor.value,
