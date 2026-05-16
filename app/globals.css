@@ -1,0 +1,27 @@
+@import './dsc-digital.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: var(--bg-page);
+  --foreground: var(--fg-1);
+}
+
+body {
+  color: var(--fg-1);
+  background: var(--bg-page);
+  font-family: var(--font-sans);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+.dark .dark-invert-logo {
+  filter: invert(1) brightness(1.8);
+  opacity: 0.55 !important;
+}
