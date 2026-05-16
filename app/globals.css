@@ -20,3 +20,8 @@ body {
     text-wrap: balance;
   }
 }
+
+.dark .dark-invert-logo {
+  filter: invert(1) brightness(1.8);
+  opacity: 0.55 !important;
+}
