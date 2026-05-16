@@ -466,24 +466,16 @@ export default function LaunchpadPage() {
       </main>
 
       {/* ── Logo footer ── */}
-      <div className="max-w-6xl mx-auto px-6 pb-10">
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {/* Empty cells push logo to last column */}
-          <div className="hidden xl:block" />
-          <div className="hidden xl:block" />
-          <div className="hidden xl:block" />
-          <div className="flex justify-end items-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="https://cgbkfogmxyawrakqvxen.supabase.co/storage/v1/object/sign/Media/DSC_Logo_Black_Payoff_2058x1080.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV85MzdiMWQ4Ni04MDMwLTQxYmYtODc1Ni04NTFkNzhiZGM1YjAiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNZWRpYS9EU0NfTG9nb19CbGFja19QYXlvZmZfMjA1OHgxMDgwLnBuZyIsImlhdCI6MTc3ODkxMzAyOCwiZXhwIjoxOTA1MDU3MDI4fQ.GEcDYbVxPh_uMwh66g0uabys4L7I7hnFK-geRSG8f_M"
-              alt="DSC logo"
-              width={144}
-              height={76}
-              className="object-contain dark-invert-logo"
-              style={{ opacity: 0.7 }}
-            />
-          </div>
-        </div>
+      <div className="max-w-6xl mx-auto px-6 pb-10 flex justify-end">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="https://cgbkfogmxyawrakqvxen.supabase.co/storage/v1/object/sign/Media/DSC_Logo_Black_Payoff_2058x1080.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV85MzdiMWQ4Ni04MDMwLTQxYmYtODc1Ni04NTFkNzhiZGM1YjAiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNZWRpYS9EU0NfTG9nb19CbGFja19QYXlvZmZfMjA1OHgxMDgwLnBuZyIsImlhdCI6MTc3ODkxMzAyOCwiZXhwIjoxOTA1MDU3MDI4fQ.GEcDYbVxPh_uMwh66g0uabys4L7I7hnFK-geRSG8f_M"
+          alt="DSC logo"
+          width={144}
+          height={76}
+          className="object-contain dark-invert-logo"
+          style={{ opacity: 0.7 }}
+        />
       </div>
 
       {/* ── Overlay ── */}
