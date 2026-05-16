@@ -111,8 +111,8 @@ function TileCard({ tile }: { tile: Tile }) {
       href={tileUrl || '#'}
       target={tileUrl ? '_blank' : '_self'}
       rel="noopener noreferrer"
-      className="group flex flex-col bg-white rounded-lg shadow-sm border border-[var(--border-subtle)] p-[22px] gap-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg no-underline"
-      style={{ textDecoration: 'none' }}
+      className="group flex flex-col rounded-lg shadow-sm border border-[var(--border-subtle)] p-[22px] gap-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg no-underline"
+      style={{ textDecoration: 'none', background: 'var(--bg-surface)' }}
     >
       {/* Icon */}
       <div
