@@ -102,7 +102,18 @@ function IconMoon() {
 }
 
 // ── Tile Card ──
-function TileCard({ tile }: { tile: Tile }) {
+interface TileCardProps {
+  tile: Tile;
+  draggable?: boolean;
+  onDragStart?: () => void;
+  onDragOver?: (e: React.DragEvent) => void;
+  onDrop?: (e: React.DragEvent) => void;
+  onDragEnd?: () => void;
+  isDragging?: boolean;
+  isDragOver?: boolean;
+}
+
+function TileCard({ tile, draggable: isDraggable, onDragStart, onDragOver, onDrop, onDragEnd, isDragging, isDragOver }: TileCardProps) {
   const tileUrl = normalizeUrl(tile.url);
   const iconBg  = hexToRgba(tile.color || '#303751', 0.12);
 
@@ -111,8 +122,21 @@ function TileCard({ tile }: { tile: Tile }) {
       href={tileUrl || '#'}
       target={tileUrl ? '_blank' : '_self'}
       rel="noopener noreferrer"
+      draggable={isDraggable}
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      onDragEnd={onDragEnd}
       className="group flex flex-col rounded-lg shadow-sm border border-[var(--border-subtle)] p-[22px] gap-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg no-underline"
-      style={{ textDecoration: 'none', background: 'var(--bg-surface)' }}
+      style={{
+        textDecoration: 'none',
+        background: 'var(--bg-surface)',
+        cursor: isDraggable ? 'grab' : undefined,
+        opacity: isDragging ? 0.35 : 1,
+        transform: isDragOver ? 'translateY(-4px)' : undefined,
+        boxShadow: isDragOver ? '0 8px 30px rgba(59,130,246,0.2)' : undefined,
+        borderColor: isDragOver ? 'var(--navy-500)' : undefined,
+      }}
     >
       {/* Icon */}
       <div
@@ -164,13 +188,42 @@ function TileCard({ tile }: { tile: Tile }) {
 }
 
 // ── Settings Tile List Item ──
-function TileListItem({ tile, onClick }: { tile: Tile; onClick: () => void }) {
+interface TileListItemProps {
+  tile: Tile;
+  onClick: () => void;
+  onDragStart?: () => void;
+  onDragOver?: (e: React.DragEvent) => void;
+  onDrop?: (e: React.DragEvent) => void;
+  onDragEnd?: () => void;
+  isDragging?: boolean;
+  isDragOver?: boolean;
+}
+
+function TileListItem({ tile, onClick, onDragStart, onDragOver, onDrop, onDragEnd, isDragging, isDragOver }: TileListItemProps) {
   const iconBg = hexToRgba(tile.color || '#303751', 0.12);
   return (
-    <button
-      onClick={onClick}
-      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors hover:bg-[var(--bg-surface-2)] cursor-pointer border-0 bg-transparent"
+    <div
+      draggable
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      onDragEnd={onDragEnd}
+      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors border"
+      style={{
+        borderColor: isDragOver ? 'var(--navy-500)' : 'transparent',
+        background: isDragOver ? 'rgba(48,55,81,0.06)' : 'transparent',
+        opacity: isDragging ? 0.4 : 1,
+        cursor: 'default',
+      }}
     >
+      {/* Drag handle */}
+      <div
+        className="flex-shrink-0 select-none text-[16px] leading-none px-0.5"
+        style={{ color: 'var(--fg-3)', cursor: 'grab' }}
+        title="Træk for at sortere"
+      >
+        ⠿
+      </div>
       <div
         className="flex items-center justify-center w-9 h-9 rounded-sm text-base flex-shrink-0"
         style={{ background: iconBg }}
@@ -185,10 +238,17 @@ function TileListItem({ tile, onClick }: { tile: Tile; onClick: () => void }) {
           {tile.category}
         </div>
       </div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--fg-3)' }}>
-        <path d="M9 18l6-6-6-6"/>
-      </svg>
-    </button>
+      <button
+        onClick={onClick}
+        className="flex items-center justify-center w-7 h-7 rounded-md transition-colors border-0 bg-transparent flex-shrink-0"
+        style={{ cursor: 'pointer' }}
+        aria-label={`Rediger ${tile.title}`}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4" style={{ color: 'var(--fg-3)' }}>
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </button>
+    </div>
   );
 }
 
@@ -226,6 +286,8 @@ export default function LaunchpadPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [modal, setModal]               = useState<ModalState>(emptyModal);
   const [nameInput, setNameInput]       = useState('');
+  const [dragSrcId, setDragSrcId]       = useState<string | null>(null);
+  const [dragOverId, setDragOverId]     = useState<string | null>(null);
   const titleRef = useRef<HTMLInputElement>(null);
 
   // ── Hydration ──
@@ -348,13 +410,22 @@ export default function LaunchpadPage() {
     setModal(emptyModal);
   }, [modal.editingId, configTiles, saveConfigTiles]);
 
+  const handleDrop = useCallback((toId: string) => {
+    if (!dragSrcId || dragSrcId === toId) return;
+    const fromIdx = configTiles.findIndex(t => t.id === dragSrcId);
+    const toIdx   = configTiles.findIndex(t => t.id === toId);
+    if (fromIdx === -1 || toIdx === -1) return;
+    const next = [...configTiles];
+    const [moved] = next.splice(fromIdx, 1);
+    next.splice(toIdx, 0, moved);
+    saveConfigTiles(next);
+  }, [dragSrcId, configTiles, saveConfigTiles]);
+
   if (!mounted) {
     return (
       <div className="min-h-screen" style={{ background: 'var(--bg-page)' }} />
     );
   }
-
-  const allTiles = [...FIXED_TILES, ...configTiles];
 
   return (
     <div
@@ -445,7 +516,7 @@ export default function LaunchpadPage() {
 
       {/* ── Main ── */}
       <main className="max-w-6xl mx-auto px-6 pb-8">
-        {allTiles.length === 0 ? (
+        {FIXED_TILES.length + configTiles.length === 0 ? (
           <div
             className="flex flex-col items-center justify-center py-24 gap-3 rounded-lg border"
             style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-surface)' }}
@@ -458,8 +529,21 @@ export default function LaunchpadPage() {
           </div>
         ) : (
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {allTiles.map(tile => (
+            {FIXED_TILES.map(tile => (
               <TileCard key={tile.id} tile={tile} />
+            ))}
+            {configTiles.map(tile => (
+              <TileCard
+                key={tile.id}
+                tile={tile}
+                draggable
+                isDragging={dragSrcId === tile.id}
+                isDragOver={dragOverId === tile.id}
+                onDragStart={() => setDragSrcId(tile.id)}
+                onDragOver={e => { e.preventDefault(); setDragOverId(tile.id); }}
+                onDrop={e => { e.preventDefault(); handleDrop(tile.id); setDragOverId(null); }}
+                onDragEnd={() => { setDragSrcId(null); setDragOverId(null); }}
+              />
             ))}
           </div>
         )}
@@ -593,7 +677,13 @@ export default function LaunchpadPage() {
                 <TileListItem
                   key={tile.id}
                   tile={tile}
-                  onClick={() => { openModalEdit(tile.id); }}
+                  onClick={() => openModalEdit(tile.id)}
+                  isDragging={dragSrcId === tile.id}
+                  isDragOver={dragOverId === tile.id}
+                  onDragStart={() => setDragSrcId(tile.id)}
+                  onDragOver={e => { e.preventDefault(); setDragOverId(tile.id); }}
+                  onDrop={e => { e.preventDefault(); handleDrop(tile.id); setDragOverId(null); }}
+                  onDragEnd={() => { setDragSrcId(null); setDragOverId(null); }}
                 />
               ))}
             </div>
