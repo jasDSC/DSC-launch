@@ -228,6 +228,21 @@ html, body {
 
 .tile:hover .tile-cta { color: var(--accent); }
 
+.tile[draggable="true"] { cursor: grab; }
+.tile[draggable="true"]:active { cursor: grabbing; }
+
+.tile.dragging {
+  opacity: 0.35;
+  transform: scale(0.97);
+}
+
+.tile.drag-over {
+  border-color: var(--accent);
+  background: rgba(59,130,246,0.08);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(59,130,246,0.2);
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -346,6 +361,26 @@ html, body {
 }
 
 .tile-list-item:hover { border-color: var(--accent); }
+
+.tile-list-item.dragging { opacity: 0.4; }
+
+.tile-list-item.drag-over {
+  border-color: var(--accent);
+  background: rgba(59,130,246,0.08);
+}
+
+.tile-drag-handle {
+  color: var(--muted);
+  cursor: grab;
+  font-size: 1.1rem;
+  line-height: 1;
+  flex-shrink: 0;
+  user-select: none;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+.tile-drag-handle:hover { color: var(--text); }
 
 .tile-list-dot {
   width: 32px;

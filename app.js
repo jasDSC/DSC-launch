@@ -72,6 +72,7 @@ function hexToRgba(hex, alpha) {
 
 let configTiles = loadConfigurable();
 let editingId = null;
+let dragSrcId = null;
 
 const greeting      = document.querySelector('.greeting');
 const fieldName     = document.getElementById('fieldName');
@@ -125,7 +126,7 @@ themeBtn.addEventListener('click', () => {
   applyTheme(!document.documentElement.classList.contains('light'));
 });
 
-function makeTileEl(tile) {
+function makeTileEl(tile, isConfigurable) {
   const a = document.createElement('a');
   a.className = 'tile';
   const tileUrl = normalizeUrl(tile.url);
@@ -142,6 +143,38 @@ function makeTileEl(tile) {
     <div class="tile-desc">${escHtml(tile.desc||'')}</div>
     <div class="tile-cta">Gå til værktøj <span>→</span></div>
   `;
+  if (isConfigurable) {
+    a.draggable = true;
+    a.dataset.id = tile.id;
+    a.addEventListener('dragstart', e => {
+      dragSrcId = tile.id;
+      a.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    a.addEventListener('dragend', () => {
+      a.classList.remove('dragging');
+      tilesGrid.querySelectorAll('.tile').forEach(el => el.classList.remove('drag-over'));
+    });
+    a.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      tilesGrid.querySelectorAll('.tile').forEach(el => el.classList.remove('drag-over'));
+      if (a.dataset.id !== dragSrcId) a.classList.add('drag-over');
+    });
+    a.addEventListener('drop', e => {
+      e.preventDefault();
+      const toId = a.dataset.id;
+      if (!dragSrcId || dragSrcId === toId) return;
+      const fromIdx = configTiles.findIndex(t => t.id === dragSrcId);
+      const toIdx   = configTiles.findIndex(t => t.id === toId);
+      if (fromIdx === -1 || toIdx === -1) return;
+      const [moved] = configTiles.splice(fromIdx, 1);
+      configTiles.splice(toIdx, 0, moved);
+      saveConfigurable(configTiles);
+      renderTiles();
+      renderTileList();
+    });
+  }
   return a;
 }
 
@@ -151,24 +184,60 @@ function renderTiles() {
   const isEmpty = all.length === 0;
   emptyState.style.display = isEmpty ? 'flex' : 'none';
   tilesGrid.style.display  = isEmpty ? 'none' : 'grid';
-  FIXED_TILES.forEach(t => tilesGrid.appendChild(makeTileEl(t)));
-  configTiles.forEach(t => tilesGrid.appendChild(makeTileEl(t)));
+  FIXED_TILES.forEach(t => tilesGrid.appendChild(makeTileEl(t, false)));
+  configTiles.forEach(t => tilesGrid.appendChild(makeTileEl(t, true)));
 }
 
 function renderTileList() {
   tileList.innerHTML = '';
+  let listDragSrc = null;
+
   configTiles.forEach(tile => {
     const item = document.createElement('div');
     item.className = 'tile-list-item';
+    item.draggable = true;
+    item.dataset.id = tile.id;
     const bg = hexToRgba(tile.color || '#3b82f6', 0.15);
     item.innerHTML = `
+      <div class="tile-drag-handle" title="Træk for at sortere">⠿</div>
       <div class="tile-list-dot" style="background:${bg};color:${escHtml(tile.color||'#3b82f6')}">${escHtml(tile.icon||'🔗')}</div>
       <div class="tile-list-info">
         <div class="tile-list-name">${escHtml(tile.title)}</div>
         <div class="tile-list-cat">${escHtml(tile.category||'PLATFORM')}</div>
       </div>
     `;
-    item.addEventListener('click', () => openModal(tile.id));
+    item.addEventListener('click', e => {
+      if (e.target.closest('.tile-drag-handle')) return;
+      openModal(tile.id);
+    });
+    item.addEventListener('dragstart', e => {
+      listDragSrc = tile.id;
+      item.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dragging');
+      tileList.querySelectorAll('.tile-list-item').forEach(el => el.classList.remove('drag-over'));
+    });
+    item.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      tileList.querySelectorAll('.tile-list-item').forEach(el => el.classList.remove('drag-over'));
+      if (item.dataset.id !== listDragSrc) item.classList.add('drag-over');
+    });
+    item.addEventListener('drop', e => {
+      e.preventDefault();
+      const toId = item.dataset.id;
+      if (!listDragSrc || listDragSrc === toId) return;
+      const fromIdx = configTiles.findIndex(t => t.id === listDragSrc);
+      const toIdx   = configTiles.findIndex(t => t.id === toId);
+      if (fromIdx === -1 || toIdx === -1) return;
+      const [moved] = configTiles.splice(fromIdx, 1);
+      configTiles.splice(toIdx, 0, moved);
+      saveConfigurable(configTiles);
+      renderTiles();
+      renderTileList();
+    });
     tileList.appendChild(item);
   });
 }
