@@ -252,6 +252,154 @@ function TileListItem({ tile, onClick, onDragStart, onDragOver, onDrop, onDragEn
   );
 }
 
+// ── Vacation Calendar ──
+interface VacationEvent {
+  name: string;
+  start: string;
+  end: string;
+}
+
+function formatShortDate(iso: string): string {
+  const d = new Date(iso + 'T12:00:00');
+  return d.toLocaleDateString('da-DK', { day: 'numeric', month: 'short' });
+}
+
+function isActiveToday(start: string, end: string): boolean {
+  const today = new Date().toISOString().slice(0, 10);
+  return start <= today && today < end;
+}
+
+const PERSON_COLORS: string[] = [
+  '#303751', '#506C56', '#BC9F6D', '#7B8FA1', '#8B7355',
+  '#4A6741', '#9B8B7A', '#3D5A80', '#6B5E4E', '#557A52',
+];
+
+function getPersonColor(name: string): string {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  return PERSON_COLORS[h % PERSON_COLORS.length];
+}
+
+function VacationCalendar() {
+  const [events, setEvents]   = useState<VacationEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState(false);
+
+  useEffect(() => {
+    fetch('/api/calendar')
+      .then(r => r.json())
+      .then(d => {
+        if (d.events) setEvents(d.events);
+        else setError(true);
+      })
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const today = new Date().toISOString().slice(0, 10);
+  const inFourWeeks = new Date(Date.now() + 28 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+  const awayNow  = events.filter(e => isActiveToday(e.start, e.end));
+  const upcoming = events.filter(e => !isActiveToday(e.start, e.end) && e.start <= inFourWeeks && e.end > today);
+
+  return (
+    <div
+      className="rounded-lg border px-5 py-4"
+      style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
+    >
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-4">
+        <span className="text-base">📅</span>
+        <span className="text-[13px] font-bold uppercase tracking-[0.1em]" style={{ color: 'var(--fg-1)' }}>
+          Feriekalender
+        </span>
+        <span className="text-[11px] ml-auto" style={{ color: 'var(--fg-3)' }}>
+          DSC Digital
+        </span>
+      </div>
+
+      {loading && (
+        <p className="text-[13px]" style={{ color: 'var(--fg-3)' }}>Henter feriedata…</p>
+      )}
+
+      {error && (
+        <p className="text-[13px]" style={{ color: 'var(--fg-3)' }}>
+          Kunne ikke hente data — tjek at Azure-integration er sat op.
+        </p>
+      )}
+
+      {!loading && !error && (
+        <div className="flex flex-col gap-4 sm:flex-row sm:gap-8">
+          {/* Away now */}
+          <div className="flex-1">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.1em] mb-2" style={{ color: 'var(--fg-2)' }}>
+              Væk i dag
+            </div>
+            {awayNow.length === 0 ? (
+              <p className="text-[13px]" style={{ color: 'var(--fg-3)' }}>Alle er på kontoret</p>
+            ) : (
+              <div className="flex flex-col gap-1.5">
+                {awayNow.map((e, i) => {
+                  const color = getPersonColor(e.name);
+                  const bg    = `${color}1a`;
+                  return (
+                    <div key={i} className="flex items-center gap-2.5">
+                      <div
+                        className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
+                        style={{ background: bg, color }}
+                      >
+                        {e.name[0].toUpperCase()}
+                      </div>
+                      <span className="text-[13px] font-semibold" style={{ color: 'var(--fg-1)' }}>{e.name}</span>
+                      <span className="text-[12px] ml-auto" style={{ color: 'var(--fg-3)' }}>
+                        til {formatShortDate(e.end)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Divider */}
+          <div className="hidden sm:block w-px self-stretch" style={{ background: 'var(--border-subtle)' }} />
+
+          {/* Upcoming */}
+          <div className="flex-1">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.1em] mb-2" style={{ color: 'var(--fg-2)' }}>
+              Kommende ferie (4 uger)
+            </div>
+            {upcoming.length === 0 ? (
+              <p className="text-[13px]" style={{ color: 'var(--fg-3)' }}>Ingen planlagt ferie de næste 4 uger</p>
+            ) : (
+              <div className="flex flex-col gap-1.5">
+                {upcoming.map((e, i) => {
+                  const color = getPersonColor(e.name);
+                  const bg    = `${color}1a`;
+                  return (
+                    <div key={i} className="flex items-center gap-2.5">
+                      <div
+                        className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
+                        style={{ background: bg, color }}
+                      >
+                        {e.name[0].toUpperCase()}
+                      </div>
+                      <span className="text-[13px] font-semibold" style={{ color: 'var(--fg-1)' }}>{e.name}</span>
+                      <span className="text-[12px] ml-auto whitespace-nowrap" style={{ color: 'var(--fg-3)' }}>
+                        {formatShortDate(e.start)} – {formatShortDate(e.end)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Modal ──
 interface ModalState {
   open: boolean;
@@ -515,7 +663,9 @@ export default function LaunchpadPage() {
       </header>
 
       {/* ── Main ── */}
-      <main className="max-w-6xl mx-auto px-6 pb-8">
+      <main className="max-w-6xl mx-auto px-6 pb-8 flex flex-col gap-6">
+        <VacationCalendar />
+
         {FIXED_TILES.length + configTiles.length === 0 ? (
           <div
             className="flex flex-col items-center justify-center py-24 gap-3 rounded-lg border"
